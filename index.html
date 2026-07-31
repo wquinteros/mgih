@@ -235,18 +235,20 @@
 
     async function cargarClientes() {
       const select = document.getElementById('select-cliente');
+      // Usamos select('*') para tolerar cualquier nombre de columna ID en la tabla clientes
       const { data: clientes, error } = await supabaseClient.from('clientes').select('*');
 
       if (error) {
-        select.innerHTML = '<option value="">Error al cargar clientes</option>';
+        console.error("Error Supabase Clientes:", error);
+        select.innerHTML = `<option value="">Error: ${error.message}</option>`;
         return;
       }
 
       select.innerHTML = '<option value="">-- Selecciona un Cliente --</option>';
       if (clientes && clientes.length > 0) {
         clientes.forEach(c => {
-          const idCliente = c.id || c.id_cliente;
-          const nombreMostrar = c.nombre_corto || c.razon_social || `Cliente #${idCliente}`;
+          const idCliente = c.cliente_id || c.id || c.id_cliente;
+          const nombreMostrar = c.nombre_corto || c.razon_social || c.nombre || `Cliente #${idCliente}`;
           select.innerHTML += `<option value="${idCliente}">${nombreMostrar}</option>`;
         });
       } else {
@@ -259,15 +261,16 @@
       const { data: aspectos, error } = await supabaseClient.from('aspectos').select('*');
 
       if (error) {
-        select.innerHTML = '<option value="">Error al cargar aspectos</option>';
+        console.error("Error Supabase Aspectos:", error);
+        select.innerHTML = `<option value="">Error: ${error.message}</option>`;
         return;
       }
 
       select.innerHTML = '<option value="">-- Selecciona un Aspecto --</option>';
       if (aspectos && aspectos.length > 0) {
         aspectos.forEach(a => {
-          const idAspecto = a.id_aspecto !== undefined ? a.id_aspecto : a.id;
-          const nombreAspecto = a.texto_aspecto || `Aspecto #${idAspecto}`;
+          const idAspecto = a.id_aspecto !== undefined ? a.id_aspecto : (a.id || a.aspecto_id);
+          const nombreAspecto = a.texto_aspecto || a.nombre || `Aspecto #${idAspecto}`;
           select.innerHTML += `<option value="${idAspecto}">${nombreAspecto}</option>`;
         });
       } else {
@@ -275,10 +278,10 @@
       }
     }
 
-    function toggleTodo(idPregunta) {
-      const btn = document.getElementById(`btn-todo-${idPregunta}`);
-      const hiddenVal = document.getElementById(`todo-val-${idPregunta}`);
-      const panelFields = document.getElementById(`panel-todo-fields-${idPregunta}`);
+    function toggleTodo(preguntaId) {
+      const btn = document.getElementById(`btn-todo-${preguntaId}`);
+      const hiddenVal = document.getElementById(`todo-val-${preguntaId}`);
+      const panelFields = document.getElementById(`panel-todo-fields-${preguntaId}`);
 
       if (hiddenVal.value === 'SI') {
         hiddenVal.value = 'NO';
@@ -295,9 +298,9 @@
       }
     }
 
-    function marcarQuickLetter(idPregunta) {
-      const btn = document.getElementById(`btn-ql-${idPregunta}`);
-      const hiddenVal = document.getElementById(`ql-val-${idPregunta}`);
+    function marcarQuickLetter(preguntaId) {
+      const btn = document.getElementById(`btn-ql-${preguntaId}`);
+      const hiddenVal = document.getElementById(`ql-val-${preguntaId}`);
 
       if (hiddenVal.value === 'SI') {
         hiddenVal.value = 'NO';
@@ -310,9 +313,9 @@
       }
     }
 
-    function toggleOpinion(idPregunta) {
-      const btn = document.getElementById(`btn-op-${idPregunta}`);
-      const hiddenVal = document.getElementById(`op-val-${idPregunta}`);
+    function toggleOpinion(preguntaId) {
+      const btn = document.getElementById(`btn-op-${preguntaId}`);
+      const hiddenVal = document.getElementById(`op-val-${preguntaId}`);
 
       if (hiddenVal.value === 'SI') {
         hiddenVal.value = 'NO';
@@ -346,16 +349,6 @@
         .select('*')
         .eq('id_aspecto', aspectoIdVal);
 
-      if ((!preguntas || preguntas.length === 0) && !isNaN(aspectoIdVal)) {
-        const resNum = await supabaseClient
-          .from('preguntas_banco')
-          .select('*')
-          .eq('id_aspecto', Number(aspectoIdVal));
-        if (resNum.data && resNum.data.length > 0) {
-          preguntas = resNum.data;
-        }
-      }
-
       if (error || !preguntas || preguntas.length === 0) {
         contenedor.innerHTML = `<div class="col-span-full p-3 bg-amber-50 text-amber-800 text-xs rounded-xl border border-amber-200">No se encontraron preguntas para este aspecto.</div>`;
         contador.textContent = '0 Preguntas';
@@ -374,13 +367,13 @@
       contenedor.innerHTML = '';
 
       preguntas.forEach((p, idx) => {
-        const idPregunta = p.id_pregunta || p.id;
-        const textoPregunta = p.texto_pregunta || `Pregunta #${idPregunta}`;
+        const preguntaId = p.pregunta_id || p.id || p.id_pregunta;
+        const textoPregunta = p.texto_pregunta || p.pregunta || `Pregunta #${preguntaId}`;
         
-        const opcionesPregunta = opcionesBanco ? opcionesBanco.filter(o => String(o.id_pregunta) === String(idPregunta)) : [];
+        const opcionesPregunta = opcionesBanco ? opcionesBanco.filter(o => String(o.pregunta_id || o.id_pregunta) === String(preguntaId)) : [];
         const tieneOpciones = opcionesPregunta.length > 0;
 
-        const respExistente = respuestasGuardadas ? respuestasGuardadas.find(r => String(r.pregunta_id) === String(idPregunta)) : null;
+        const respExistente = respuestasGuardadas ? respuestasGuardadas.find(r => String(r.pregunta_id) === String(preguntaId)) : null;
 
         const valResultado = respExistente ? respExistente.resultado : '';
         const valRespuestaText = respExistente ? (respExistente.respuesta || respExistente.observaciones || '') : '';
@@ -390,7 +383,6 @@
         const esTodo = respExistente ? (respExistente.es_todo ? 'SI' : 'NO') : 'NO';
         const valTodoText = respExistente ? (respExistente.detalle_todo || '') : '';
         
-        // Cargar los checks de visitas guardados
         const valTodoVisita = respExistente ? (respExistente.todo_visita || '') : '';
         const chkPreliminar = valTodoVisita.includes('Visita Preliminar') ? 'checked' : '';
         const chkFinal = valTodoVisita.includes('Visita Final') ? 'checked' : '';
@@ -410,7 +402,7 @@
         if (tieneOpciones) {
           let opcionesOptions = '<option value="">-- Selecciona una Opción --</option>';
           opcionesPregunta.forEach(op => {
-            const textoOp = op.texto_opcion || op.opcion || `Opción #${op.id_opcion}`;
+            const textoOp = op.texto_opcion || op.opcion || `Opción #${op.id_opcion || op.opcion_id}`;
             const selected = (valResultado === textoOp) ? 'selected' : '';
             opcionesOptions += `<option value="${textoOp}" ${selected}>${textoOp}</option>`;
           });
@@ -418,7 +410,7 @@
           htmlSeleccion = `
             <div class="mb-3">
               <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Opción Seleccionada</label>
-              <select id="sel-${idPregunta}" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500">
+              <select id="sel-${preguntaId}" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500">
                 ${opcionesOptions}
               </select>
             </div>
@@ -444,12 +436,12 @@
               <!-- 1. RESPUESTA -->
               <div>
                 <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Respuesta (${anioVal})</label>
-                <textarea id="resp-${idPregunta}" rows="4" placeholder="Escribe la respuesta correspondiente al año ${anioVal}..." class="w-full p-2.5 border border-slate-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50 focus:bg-white leading-relaxed">${valRespuestaText}</textarea>
+                <textarea id="resp-${preguntaId}" rows="4" placeholder="Escribe la respuesta correspondiente al año ${anioVal}..." class="w-full p-2.5 border border-slate-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50 focus:bg-white leading-relaxed">${valRespuestaText}</textarea>
               </div>
 
               <!-- 2. TO/DO -->
               <div class="p-2.5 bg-slate-100 rounded-lg border border-slate-300 space-y-2">
-                <button onclick="toggleTodo('${idPregunta}')" id="btn-todo-${idPregunta}" 
+                <button onclick="toggleTodo('${preguntaId}')" id="btn-todo-${preguntaId}" 
                         class="w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center ${
                           esTodo === 'SI' 
                           ? 'bg-slate-700 text-white border border-slate-800' 
@@ -457,24 +449,23 @@
                         }">
                   ${esTodo === 'SI' ? 'Registrado en To/Do' : 'To/Do'}
                 </button>
-                <input type="hidden" id="todo-val-${idPregunta}" value="${esTodo}">
+                <input type="hidden" id="todo-val-${preguntaId}" value="${esTodo}">
 
-                <div id="panel-todo-fields-${idPregunta}" class="${esTodo === 'SI' ? 'block' : 'hidden'} space-y-2 pt-2 border-t border-slate-300">
+                <div id="panel-todo-fields-${preguntaId}" class="${esTodo === 'SI' ? 'block' : 'hidden'} space-y-2 pt-2 border-t border-slate-300">
                   <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Detalle To/Do</label>
-                    <textarea id="todo-text-${idPregunta}" rows="2" placeholder="Detalle de lo que está pendiente..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white leading-tight">${valTodoText}</textarea>
+                    <textarea id="todo-text-${preguntaId}" rows="2" placeholder="Detalle de lo que está pendiente..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white leading-tight">${valTodoText}</textarea>
                   </div>
 
-                  <!-- NUEVO CAMPO SOLICITADO: A REALIZAR TO/DO (VISITAS) -->
                   <div class="bg-white p-2 rounded border border-slate-200">
                     <label class="block text-[11px] font-bold text-indigo-700 mb-1">A Realizar To/Do</label>
                     <div class="flex items-center gap-4 text-xs font-medium text-slate-700">
                       <label class="flex items-center gap-1.5 cursor-pointer">
-                        <input type="checkbox" id="todo-visita-preliminar-${idPregunta}" ${chkPreliminar} class="rounded text-indigo-600 focus:ring-indigo-500">
+                        <input type="checkbox" id="todo-visita-preliminar-${preguntaId}" ${chkPreliminar} class="rounded text-indigo-600 focus:ring-indigo-500">
                         <span>Visita Preliminar</span>
                       </label>
                       <label class="flex items-center gap-1.5 cursor-pointer">
-                        <input type="checkbox" id="todo-visita-final-${idPregunta}" ${chkFinal} class="rounded text-indigo-600 focus:ring-indigo-500">
+                        <input type="checkbox" id="todo-visita-final-${preguntaId}" ${chkFinal} class="rounded text-indigo-600 focus:ring-indigo-500">
                         <span>Visita Final</span>
                       </label>
                     </div>
@@ -482,23 +473,23 @@
 
                   <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Asignado - email</label>
-                    <input type="email" id="todo-email-${idPregunta}" value="${valTodoAsignadoEmail}" placeholder="ejemplo@correo.com" class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white">
+                    <input type="email" id="todo-email-${preguntaId}" value="${valTodoAsignadoEmail}" placeholder="ejemplo@correo.com" class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white">
                   </div>
 
                   <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Comentario Ejecutor</label>
-                    <textarea id="todo-comentario-ejecutor-${idPregunta}" rows="2" placeholder="Comentario o avance de quien ejecuta el To/Do..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white leading-tight">${valTodoComentarioEjecutor}</textarea>
+                    <textarea id="todo-comentario-ejecutor-${preguntaId}" rows="2" placeholder="Comentario o avance de quien ejecuta el To/Do..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white leading-tight">${valTodoComentarioEjecutor}</textarea>
                   </div>
 
                   <div class="p-2 bg-white rounded border border-slate-200 space-y-2">
                     <div class="flex items-center gap-2">
-                      <input type="checkbox" id="todo-revisado-${idPregunta}" ${valTodoRevisado ? 'checked' : ''} class="w-4 h-4 text-slate-700 border-slate-300 rounded focus:ring-slate-500">
-                      <label for="todo-revisado-${idPregunta}" class="text-xs font-bold text-slate-700">To/Do Revisado</label>
+                      <input type="checkbox" id="todo-revisado-${preguntaId}" ${valTodoRevisado ? 'checked' : ''} class="w-4 h-4 text-slate-700 border-slate-300 rounded focus:ring-slate-500">
+                      <label for="todo-revisado-${preguntaId}" class="text-xs font-bold text-slate-700">To/Do Revisado</label>
                     </div>
 
                     <div>
                       <label class="block text-[11px] font-bold text-slate-600 mb-1">Email de quien revisó</label>
-                      <input type="email" id="todo-reviso-email-${idPregunta}" value="${valTodoRevisoEmail}" placeholder="revisor@correo.com" class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-slate-50">
+                      <input type="email" id="todo-reviso-email-${preguntaId}" value="${valTodoRevisoEmail}" placeholder="revisor@correo.com" class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-slate-50">
                     </div>
                   </div>
                 </div>
@@ -506,7 +497,7 @@
 
               <!-- 3. QUICK LETT -->
               <div class="p-2.5 bg-orange-50/60 rounded-lg border border-orange-200 space-y-2">
-                <button onclick="marcarQuickLetter('${idPregunta}')" id="btn-ql-${idPregunta}" 
+                <button onclick="marcarQuickLetter('${preguntaId}')" id="btn-ql-${preguntaId}" 
                         class="w-full py-2 text-xs font-bold rounded-lg transition shadow-sm flex items-center justify-center ${
                           esQL === 'SI' 
                           ? 'bg-orange-500 text-white border border-orange-600' 
@@ -514,13 +505,13 @@
                         }">
                   ${esQL === 'SI' ? 'ACTIVADO EN QUICK LETT' : 'Quick Lett'}
                 </button>
-                <input type="hidden" id="ql-val-${idPregunta}" value="${esQL}">
-                <textarea id="ql-obs-${idPregunta}" rows="2" placeholder="Escribe el detalle del hallazgo para Quick Lett..." class="w-full p-2 border border-orange-200 rounded-md text-xs outline-none focus:ring-1 focus:ring-orange-500 bg-white leading-tight">${valObservacionQL}</textarea>
+                <input type="hidden" id="ql-val-${preguntaId}" value="${esQL}">
+                <textarea id="ql-obs-${preguntaId}" rows="2" placeholder="Escribe el detalle del hallazgo para Quick Lett..." class="w-full p-2 border border-orange-200 rounded-md text-xs outline-none focus:ring-1 focus:ring-orange-500 bg-white leading-tight">${valObservacionQL}</textarea>
               </div>
 
               <!-- 4. OPINIÓN -->
               <div class="p-2.5 bg-rose-50/70 rounded-lg border border-rose-200 space-y-2">
-                <button onclick="toggleOpinion('${idPregunta}')" id="btn-op-${idPregunta}" 
+                <button onclick="toggleOpinion('${preguntaId}')" id="btn-op-${preguntaId}" 
                         class="w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center ${
                           esOpinion === 'SI' 
                           ? 'bg-rose-600 text-white border border-rose-700' 
@@ -528,22 +519,22 @@
                         }">
                   ${esOpinion === 'SI' ? 'ACTIVADO EN OPINIÓN' : 'Opinión'}
                 </button>
-                <input type="hidden" id="op-val-${idPregunta}" value="${esOpinion}">
-                <textarea id="op-text-${idPregunta}" rows="2" placeholder="Escribe el argumento o razón por la cual va a la opinión..." class="w-full p-2 border border-rose-200 rounded-md text-xs outline-none focus:ring-1 focus:ring-rose-500 bg-white leading-tight">${valOpinionText}</textarea>
+                <input type="hidden" id="op-val-${preguntaId}" value="${esOpinion}">
+                <textarea id="op-text-${preguntaId}" rows="2" placeholder="Escribe el argumento o razón por la cual va a la opinión..." class="w-full p-2 border border-rose-200 rounded-md text-xs outline-none focus:ring-1 focus:ring-rose-500 bg-white leading-tight">${valOpinionText}</textarea>
               </div>
 
               <!-- 5. DECISIÓN FINAL -->
               <div class="bg-slate-100 p-2.5 rounded-lg border border-slate-300 space-y-2">
                 <label class="block text-[11px] font-bold text-slate-700 mb-1">Decisión Final (A Opinión?)</label>
-                <select id="socio-sel-${idPregunta}" class="w-full p-2 bg-white border border-slate-300 font-semibold text-xs rounded-md outline-none focus:ring-1 focus:ring-indigo-500">
+                <select id="socio-sel-${preguntaId}" class="w-full p-2 bg-white border border-slate-300 font-semibold text-xs rounded-md outline-none focus:ring-1 focus:ring-indigo-500">
                   <option value="PENDIENTE" ${decisionSocioVal === 'PENDIENTE' ? 'selected' : ''}>Pendiente de Revisión por el Socio</option>
                   <option value="VA_OPINION" ${decisionSocioVal === 'VA_OPINION' ? 'selected' : ''}>SI VA a la Opinión Final</option>
                   <option value="NO_VA" ${decisionSocioVal === 'NO_VA' ? 'selected' : ''}>NO VA (Desestimado / Corregido)</option>
                 </select>
-                <textarea id="socio-comment-${idPregunta}" rows="2" placeholder="Escribe un comentario sobre la decisión final..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-indigo-500 bg-white leading-tight">${comentarioDecisionVal}</textarea>
+                <textarea id="socio-comment-${preguntaId}" rows="2" placeholder="Escribe un comentario sobre la decisión final..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-indigo-500 bg-white leading-tight">${comentarioDecisionVal}</textarea>
               </div>
 
-              <button onclick="guardarPreguntaCompleta('${idPregunta}', ${tieneOpciones})" class="w-full py-2.5 text-xs font-bold rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition shadow">
+              <button onclick="guardarPreguntaCompleta('${preguntaId}', ${tieneOpciones})" class="w-full py-2.5 text-xs font-bold rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition shadow">
                 Guardar Evaluación ${anioVal}
               </button>
 
@@ -553,7 +544,7 @@
       });
     }
 
-    async function guardarPreguntaCompleta(idPregunta, tieneOpciones) {
+    async function guardarPreguntaCompleta(preguntaId, tieneOpciones) {
       const clienteIdVal = document.getElementById('select-cliente').value;
       const anioVal = document.getElementById('select-anio').value;
 
@@ -564,50 +555,49 @@
 
       let resultadoVal = '';
       if (tieneOpciones) {
-        const selObj = document.getElementById(`sel-${idPregunta}`);
+        const selObj = document.getElementById(`sel-${preguntaId}`);
         if (selObj) resultadoVal = selObj.value;
       }
 
-      const qlVal = document.getElementById(`ql-val-${idPregunta}`).value;
+      const qlVal = document.getElementById(`ql-val-${preguntaId}`).value;
       if (qlVal === 'SI') {
         resultadoVal = 'QUICK_LETTER';
       }
 
-      const respVal = document.getElementById(`resp-${idPregunta}`).value;
-      const obsQL = document.getElementById(`ql-obs-${idPregunta}`).value;
+      const respVal = document.getElementById(`resp-${preguntaId}`).value;
+      const obsQL = document.getElementById(`ql-obs-${preguntaId}`).value;
 
-      const esTodoVal = document.getElementById(`todo-val-${idPregunta}`).value === 'SI';
-      const detailTodoVal = document.getElementById(`todo-text-${idPregunta}`).value;
+      const esTodoVal = document.getElementById(`todo-val-${preguntaId}`).value === 'SI';
+      const detailTodoVal = document.getElementById(`todo-text-${preguntaId}`).value;
       
-      // Armar la cadena de Visita Preliminar y/o Final
-      const preliminarChecked = document.getElementById(`todo-visita-preliminar-${idPregunta}`).checked;
-      const finalChecked = document.getElementById(`todo-visita-final-${idPregunta}`).checked;
+      const preliminarChecked = document.getElementById(`todo-visita-preliminar-${preguntaId}`).checked;
+      const finalChecked = document.getElementById(`todo-visita-final-${preguntaId}`).checked;
       let visitasArr = [];
       if (preliminarChecked) visitasArr.push('Visita Preliminar');
       if (finalChecked) visitasArr.push('Visita Final');
       const todoVisitaVal = visitasArr.join(', ');
 
-      const emailTodoVal = document.getElementById(`todo-email-${idPregunta}`).value;
-      const comEjecutorVal = document.getElementById(`todo-comentario-ejecutor-${idPregunta}`).value;
-      const revTodoVal = document.getElementById(`todo-revisado-${idPregunta}`).checked;
-      const revEmailVal = document.getElementById(`todo-reviso-email-${idPregunta}`).value;
+      const emailTodoVal = document.getElementById(`todo-email-${preguntaId}`).value;
+      const comEjecutorVal = document.getElementById(`todo-comentario-ejecutor-${preguntaId}`).value;
+      const revTodoVal = document.getElementById(`todo-revisado-${preguntaId}`).checked;
+      const revEmailVal = document.getElementById(`todo-reviso-email-${preguntaId}`).value;
 
-      const esOpinionVal = document.getElementById(`op-val-${idPregunta}`).value === 'SI';
-      const detailOpinionVal = document.getElementById(`op-text-${idPregunta}`).value;
+      const esOpinionVal = document.getElementById(`op-val-${preguntaId}`).value === 'SI';
+      const detailOpinionVal = document.getElementById(`op-text-${preguntaId}`).value;
 
-      const decSocioVal = document.getElementById(`socio-sel-${idPregunta}`).value;
-      const comSocioVal = document.getElementById(`socio-comment-${idPregunta}`).value;
+      const decSocioVal = document.getElementById(`socio-sel-${preguntaId}`).value;
+      const comSocioVal = document.getElementById(`socio-comment-${preguntaId}`).value;
 
       const payload = {
         cliente_id: clienteIdVal,
-        pregunta_id: idPregunta,
+        pregunta_id: preguntaId,
         anio: Number(anioVal),
         resultado: resultadoVal,
         respuesta: respVal,
         observaciones_ql: obsQL,
         es_todo: esTodoVal,
         detalle_todo: detailTodoVal,
-        todo_visita: todoVisitaVal, // GUARDA VISITA PRELIMINAR / FINAL
+        todo_visita: todoVisitaVal,
         todo_asignado_email: emailTodoVal,
         todo_comentario_ejecutor: comEjecutorVal,
         todo_revisado: revTodoVal,
@@ -648,11 +638,6 @@
         .select('*')
         .eq('id_aspecto', aspectoIdVal);
 
-      if ((!preguntas || preguntas.length === 0) && !isNaN(aspectoIdVal)) {
-        const resNum = await supabaseClient.from('preguntas_banco').select('*').eq('id_aspecto', Number(aspectoIdVal));
-        if (resNum.data) preguntas = resNum.data;
-      }
-
       if (!preguntas || preguntas.length === 0) {
         tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-amber-700 bg-amber-50">No hay preguntas registradas para este aspecto.</td></tr>`;
         contador.textContent = '0 Preguntas';
@@ -670,14 +655,14 @@
       const anios = [2024, 2025, 2026, 2027];
 
       preguntas.forEach((p, idx) => {
-        const idPregunta = p.id_pregunta || p.id;
-        const textoPregunta = p.texto_pregunta || `Pregunta #${idPregunta}`;
+        const preguntaId = p.pregunta_id || p.id || p.id_pregunta;
+        const textoPregunta = p.texto_pregunta || p.pregunta || `Pregunta #${preguntaId}`;
 
         let celdasAnios = '';
 
         anios.forEach(a => {
           const resp = todasLasRespuestas 
-            ? todasLasRespuestas.find(r => String(r.pregunta_id) === String(idPregunta) && Number(r.anio) === a)
+            ? todasLasRespuestas.find(r => String(r.pregunta_id) === String(preguntaId) && Number(r.anio) === a)
             : null;
 
           if (!resp) {
@@ -792,8 +777,8 @@
       const { data: preguntas } = await supabaseClient.from('preguntas_banco').select('*');
 
       respuestas.forEach((r, idx) => {
-        const pregObj = preguntas ? preguntas.find(p => String(p.id_pregunta || p.id) === String(r.pregunta_id)) : null;
-        const textoPreg = pregObj ? (pregObj.texto_pregunta || `Pregunta #${r.pregunta_id}`) : `Pregunta #${r.pregunta_id}`;
+        const pregObj = preguntas ? preguntas.find(p => String(p.pregunta_id || p.id || p.id_pregunta) === String(r.pregunta_id)) : null;
+        const textoPreg = pregObj ? (pregObj.texto_pregunta || pregObj.pregunta || `Pregunta #${r.pregunta_id}`) : `Pregunta #${r.pregunta_id}`;
 
         contenedor.innerHTML += `
           <div class="p-4 bg-orange-50/40 border border-orange-200 rounded-xl space-y-2 shadow-xs">
@@ -862,8 +847,8 @@
       const { data: preguntas } = await supabaseClient.from('preguntas_banco').select('*');
 
       respuestas.forEach((r, idx) => {
-        const pregObj = preguntas ? preguntas.find(p => String(p.id_pregunta || p.id) === String(r.pregunta_id)) : null;
-        const textoPreg = pregObj ? (pregObj.texto_pregunta || `Pregunta #${r.pregunta_id}`) : `Pregunta #${r.pregunta_id}`;
+        const pregObj = preguntas ? preguntas.find(p => String(p.pregunta_id || p.id || p.id_pregunta) === String(r.pregunta_id)) : null;
+        const textoPreg = pregObj ? (pregObj.texto_pregunta || pregObj.pregunta || `Pregunta #${r.pregunta_id}`) : `Pregunta #${r.pregunta_id}`;
 
         let estadoBadge = '';
         if (r.decision_socio === 'VA_OPINION') {
