@@ -3,868 +3,214 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Auditoría</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>MGI H - Módulo de Respuestas de Auditoría</title>
+  <!-- Framework CSS opcional para estilos limpios (Bootstrap 5) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding-bottom: 50px;
+    }
+    .header-mgi {
+      background-color: #1a365d;
+      color: white;
+      padding: 20px 0;
+      margin-bottom: 30px;
+      border-bottom: 4px solid #c59b27;
+    }
+    .card-custom {
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    .card-header-custom {
+      background-color: #f1f5f9;
+      font-weight: bold;
+      color: #1a365d;
+      border-bottom: 2px solid #cbd5e1;
+    }
+    .section-todo {
+      background-color: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+    .todo-title {
+      color: #92400e;
+      font-weight: bold;
+    }
+  </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 p-2 sm:p-4 font-sans">
+<body>
 
-  <div class="max-w-[98%] mx-auto bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden min-h-[92vh]">
+  <!-- CABECERA PRINCIPAL -->
+  <header class="header-mgi text-center">
+    <div class="container">
+      <h2 class="m-0 fw-bold">MGI H — HERRAMIENTAS DE AUDITORÍA</h2>
+      <p class="m-0 text-light opacity-75">Cuestionario Global y Registro de Evaluaciones</p>
+    </div>
+  </header>
+
+  <div class="container">
     
-    <!-- Encabezado con Modos de Vista -->
-    <div class="bg-indigo-600 px-4 py-3 sm:px-6 sm:py-4 text-white flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3">
-      <div>
-        <h1 class="text-base sm:text-xl font-bold tracking-tight">Auditoría</h1>
-        <p class="text-[11px] sm:text-xs text-indigo-200">Planificación, Monitoreo, Conclusiones</p>
+    <!-- DATOS CABECERA DE EVALUACIÓN -->
+    <div class="card card-custom">
+      <div class="card-header card-header-custom">
+        1. Contexto de la Evaluación
       </div>
-      
-      <!-- Pestañas de Navegación -->
-      <div class="flex flex-wrap bg-indigo-800/60 p-1 rounded-xl border border-indigo-400/30 gap-1">
-        <button id="tab-captura-btn" onclick="cambiarPestana('captura')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-900 shadow">
-          Captura por Año
-        </button>
-        <button id="tab-historico-btn" onclick="cambiarPestana('historico')" class="px-3 py-1.5 text-xs font-bold rounded-lg text-indigo-100 hover:text-white transition">
-          Histórico de Pregunta por Año
-        </button>
-        <button id="tab-quicklett-btn" onclick="cambiarPestana('quicklett')" class="px-3 py-1.5 text-xs font-bold rounded-lg text-indigo-100 hover:text-white transition">
-          Resumen Quick Lett
-        </button>
-        <button id="tab-opinion-btn" onclick="cambiarPestana('opinion')" class="px-3 py-1.5 text-xs font-bold rounded-lg text-indigo-100 hover:text-white transition">
-          Resumen Opinión
-        </button>
-      </div>
-    </div>
-
-    <div class="p-3 sm:p-6 space-y-4">
-
-      <!-- PASO 1: Selector Global (Cliente, Año y Aspecto) -->
-      <div class="bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200 space-y-3">
-        <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">1. Selección de Cliente, Año y Aspectos</h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-          
-          <!-- Cliente -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Cliente a Auditar</label>
-            <select id="select-cliente" onchange="ejecutarConsultaSegunVista()" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition">
-              <option value="">Cargando clientes...</option>
-            </select>
-          </div>
-
-          <!-- Año de Evaluación -->
-          <div id="box-select-anio">
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Año a Evaluar</label>
-            <select id="select-anio" onchange="cargarPreguntas()" class="w-full p-2 bg-slate-900 font-bold text-white rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-slate-700 outline-none shadow-sm transition">
-              <option value="2027">Año 2027</option>
-              <option value="2026" selected>Año 2026</option>
-              <option value="2025">Año 2025</option>
-              <option value="2024">Año 2024</option>
-            </select>
-          </div>
-
-          <!-- Aspecto -->
-          <div id="box-select-aspecto">
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Aspecto a Evaluar</label>
-            <select id="select-aspecto" onchange="ejecutarConsultaSegunVista()" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition">
-              <option value="">Cargando aspectos...</option>
-            </select>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- VISTA 1: Cuestionario de Evaluación (Tarjetas) -->
-      <div id="vista-captura">
-        <div class="flex justify-between items-center mb-3">
-          <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">2. Cuestionario de Evaluación</h2>
-          <span id="contador-preguntas" class="text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-md">0 Preguntas</span>
-        </div>
-
-        <div id="contenedor-preguntas" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">
-            Selecciona un cliente, año y un aspecto arriba para cargar el cuestionario.
-          </p>
-        </div>
-      </div>
-
-      <!-- VISTA 2: Histórico Comparativo -->
-      <div id="vista-historico" class="hidden space-y-3">
-        <div class="flex justify-between items-center mb-2">
-          <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">2. Comparativa Histórica Pregunta por Pregunta (Multianual)</h2>
-          <span id="contador-historico" class="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md">0 Preguntas</span>
-        </div>
-
-        <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm bg-white">
-          <table class="w-full text-left text-xs text-slate-700 border-collapse">
-            <thead class="bg-slate-100 text-slate-600 uppercase text-[10px] font-bold border-b border-slate-200">
-              <tr>
-                <th class="p-3 w-1/4 border-r border-slate-200 min-w-[220px]">Pregunta / Criterio</th>
-                <th class="p-3 w-1/4 text-center border-r border-slate-200 min-w-[180px] bg-amber-50">2024</th>
-                <th class="p-3 w-1/4 text-center border-r border-slate-200 min-w-[180px] bg-indigo-50">2025</th>
-                <th class="p-3 w-1/4 text-center border-r border-slate-200 min-w-[180px] bg-slate-900 text-white">2026</th>
-                <th class="p-3 w-1/4 text-center min-w-[180px] bg-purple-50">2027</th>
-              </tr>
-            </thead>
-            <tbody id="tabla-historico-body" class="divide-y divide-slate-200">
-              <tr>
-                <td colspan="5" class="p-8 text-center text-slate-400">
-                  Selecciona un cliente y un aspecto arriba para desplegar la comparativa multianual.
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- VISTA 3: Resumen Quick Lett (Acumulado) -->
-      <div id="vista-quicklett" class="hidden space-y-3">
-        <div class="flex justify-between items-center mb-2">
-          <h2 class="text-[11px] font-bold uppercase tracking-wider text-orange-600">2. Acumulado de Hallazgos Quick Lett (Todos los Aspectos)</h2>
-          <span id="contador-ql" class="text-xs font-bold text-orange-700 bg-orange-50 border border-orange-200 px-2.5 py-0.5 rounded-md">0 Hallazgos</span>
-        </div>
-
-        <div id="contenedor-resumen-ql" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">
-            Selecciona un cliente arriba para ver el acumulado de Quick Lett.
-          </p>
-        </div>
-      </div>
-
-      <!-- VISTA 4: Resumen Opinión (Acumulado) -->
-      <div id="vista-opinion" class="hidden space-y-3">
-        <div class="flex justify-between items-center mb-2">
-          <h2 class="text-[11px] font-bold uppercase tracking-wider text-rose-600">2. Acumulado de Puntos para Opinión (Todos los Aspectos)</h2>
-          <div class="flex items-center gap-2">
-            <span id="estado-global-opinion" class="text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-md">Sin Estado</span>
-            <span id="contador-opinion" class="text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-md">0 Casos</span>
-          </div>
-        </div>
-
-        <div id="contenedor-resumen-opinion" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">
-            Selecciona un cliente arriba para ver el acumulado de Puntos para Opinión.
-          </p>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <script>
-    const SUPABASE_URL = 'https://yyjeqklvrhezprrkdfof.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5amVxa2x2cmhlenBycmtkZm9mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzNTcxNDIsImV4cCI6MjEwMDkzMzE0Mn0.Jzgfkcay8wYUXxt38ZmPJ3rG3HhZmWp01OYAQamPeOE';
-
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    let pestanaActual = 'captura';
-
-    async function iniciar() {
-      await cargarClientes();
-      await cargarAspectos();
-    }
-
-    function cambiarPestana(modo) {
-      pestanaActual = modo;
-      
-      const btnCaptura = document.getElementById('tab-captura-btn');
-      const btnHistorico = document.getElementById('tab-historico-btn');
-      const btnQuickLett = document.getElementById('tab-quicklett-btn');
-      const btnOpinion = document.getElementById('tab-opinion-btn');
-
-      const vistaCaptura = document.getElementById('vista-captura');
-      const vistaHistorico = document.getElementById('vista-historico');
-      const vistaQuickLett = document.getElementById('vista-quicklett');
-      const vistaOpinion = document.getElementById('vista-opinion');
-
-      const boxAnio = document.getElementById('box-select-anio');
-      const boxAspecto = document.getElementById('box-select-aspecto');
-
-      const activeClass = "px-3 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-900 shadow";
-      const inactiveClass = "px-3 py-1.5 text-xs font-bold rounded-lg text-indigo-100 hover:text-white transition";
-
-      btnCaptura.className = inactiveClass;
-      btnHistorico.className = inactiveClass;
-      btnQuickLett.className = inactiveClass;
-      btnOpinion.className = inactiveClass;
-
-      vistaCaptura.classList.add('hidden');
-      vistaHistorico.classList.add('hidden');
-      vistaQuickLett.classList.add('hidden');
-      vistaOpinion.classList.add('hidden');
-
-      if (modo === 'captura') {
-        btnCaptura.className = activeClass;
-        vistaCaptura.classList.remove('hidden');
-        boxAnio.classList.remove('hidden');
-        boxAspecto.classList.remove('hidden');
-      } else if (modo === 'historico') {
-        btnHistorico.className = activeClass;
-        vistaHistorico.classList.remove('hidden');
-        boxAnio.classList.add('hidden');
-        boxAspecto.classList.remove('hidden');
-      } else if (modo === 'quicklett') {
-        btnQuickLett.className = activeClass;
-        vistaQuickLett.classList.remove('hidden');
-        boxAnio.classList.add('hidden');
-        boxAspecto.classList.add('hidden');
-      } else if (modo === 'opinion') {
-        btnOpinion.className = activeClass;
-        vistaOpinion.classList.remove('hidden');
-        boxAnio.classList.add('hidden');
-        boxAspecto.classList.add('hidden');
-      }
-
-      ejecutarConsultaSegunVista();
-    }
-
-    function ejecutarConsultaSegunVista() {
-      if (pestanaActual === 'captura') {
-        cargarPreguntas();
-      } else if (pestanaActual === 'historico') {
-        cargarHistoricoComparativo();
-      } else if (pestanaActual === 'quicklett') {
-        cargarResumenQuickLett();
-      } else if (pestanaActual === 'opinion') {
-        cargarResumenOpinion();
-      }
-    }
-
-    async function cargarClientes() {
-      const select = document.getElementById('select-cliente');
-      const { data: clientes, error } = await supabaseClient.from('clientes').select('*');
-
-      if (error) {
-        select.innerHTML = '<option value="">Error al cargar clientes</option>';
-        return;
-      }
-
-      select.innerHTML = '<option value="">-- Selecciona un Cliente --</option>';
-      if (clientes && clientes.length > 0) {
-        clientes.forEach(c => {
-          const idCliente = c.id || c.id_cliente;
-          const nombreMostrar = c.nombre_corto || c.razon_social || `Cliente #${idCliente}`;
-          select.innerHTML += `<option value="${idCliente}">${nombreMostrar}</option>`;
-        });
-      } else {
-        select.innerHTML = '<option value="">No hay clientes registrados</option>';
-      }
-    }
-
-    async function cargarAspectos() {
-      const select = document.getElementById('select-aspecto');
-      const { data: aspectos, error } = await supabaseClient.from('aspectos').select('*');
-
-      if (error) {
-        select.innerHTML = '<option value="">Error al cargar aspectos</option>';
-        return;
-      }
-
-      select.innerHTML = '<option value="">-- Selecciona un Aspecto --</option>';
-      if (aspectos && aspectos.length > 0) {
-        aspectos.forEach(a => {
-          const idAspecto = a.id_aspecto !== undefined ? a.id_aspecto : a.id;
-          const nombreAspecto = a.texto_aspecto || `Aspecto #${idAspecto}`;
-          select.innerHTML += `<option value="${idAspecto}">${nombreAspecto}</option>`;
-        });
-      } else {
-        select.innerHTML = '<option value="">No hay aspectos creados</option>';
-      }
-    }
-
-    async function cargarPreguntas() {
-      const clienteIdVal = document.getElementById('select-cliente').value;
-      const anioVal = document.getElementById('select-anio').value;
-      const aspectoIdVal = document.getElementById('select-aspecto').value;
-      
-      const contenedor = document.getElementById('contenedor-preguntas');
-      const contador = document.getElementById('contador-preguntas');
-
-      if (!aspectoIdVal || !clienteIdVal) {
-        contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">Selecciona un cliente y un aspecto arriba para cargar los datos.</p>';
-        contador.textContent = '0 Preguntas';
-        return;
-      }
-
-      contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-6">Cargando preguntas y respuestas del año ' + anioVal + '...</p>';
-
-      let { data: preguntas, error } = await supabaseClient
-        .from('preguntas_banco')
-        .select('*')
-        .eq('id_aspecto', aspectoIdVal);
-
-      if ((!preguntas || preguntas.length === 0) && !isNaN(aspectoIdVal)) {
-        const resNum = await supabaseClient
-          .from('preguntas_banco')
-          .select('*')
-          .eq('id_aspecto', Number(aspectoIdVal));
-        if (resNum.data && resNum.data.length > 0) {
-          preguntas = resNum.data;
-        }
-      }
-
-      if (error || !preguntas || preguntas.length === 0) {
-        contenedor.innerHTML = `<div class="col-span-full p-3 bg-amber-50 text-amber-800 text-xs rounded-xl border border-amber-200">No se encontraron preguntas para este aspecto.</div>`;
-        contador.textContent = '0 Preguntas';
-        return;
-      }
-
-      const { data: opcionesBanco } = await supabaseClient.from('opciones_pregunta').select('*');
-
-      const { data: respuestasGuardadas } = await supabaseClient
-        .from('respuestas_auditoria')
-        .select('*')
-        .eq('cliente_id', clienteIdVal)
-        .eq('anio', Number(anioVal));
-
-      contador.textContent = `${preguntas.length} Preguntas`;
-      contenedor.innerHTML = '';
-
-      preguntas.forEach((p, idx) => {
-        const idPregunta = p.id_pregunta || p.id;
-        const textoPregunta = p.texto_pregunta || `Pregunta #${idPregunta}`;
-        
-        const opcionesPregunta = opcionesBanco ? opcionesBanco.filter(o => String(o.id_pregunta) === String(idPregunta)) : [];
-        const tieneOpciones = opcionesPregunta.length > 0;
-
-        const respExistente = respuestasGuardadas ? respuestasGuardadas.find(r => String(r.pregunta_id) === String(idPregunta)) : null;
-
-        const valResultado = respExistente ? respExistente.resultado : '';
-        const valRespuestaText = respExistente ? (respExistente.respuesta || respExistente.observaciones || '') : '';
-        const valObservacionQL = respExistente ? (respExistente.observaciones_ql || '') : '';
-        const esQL = valResultado === 'QUICK_LETTER' ? 'SI' : 'NO';
-        
-        const esTodo = respExistente ? (respExistente.es_todo ? 'SI' : 'NO') : 'NO';
-        const valTodoText = respExistente ? (respExistente.detalle_todo || '') : '';
-        const valTodoAsignadoEmail = respExistente ? (respExistente.todo_asignado_email || '') : '';
-        const valTodoComentarioEjecutor = respExistente ? (respExistente.todo_comentario_ejecutor || '') : '';
-        const valTodoRevisado = respExistente ? (respExistente.todo_revisado ? true : false) : false;
-        const valTodoRevisoEmail = respExistente ? (respExistente.todo_reviso_email || '') : '';
-
-        const esOpinion = respExistente ? (respExistente.es_opinion ? 'SI' : 'NO') : 'NO';
-        const valOpinionText = respExistente ? (respExistente.detalle_opinion || '') : '';
-        
-        const decisionSocioVal = respExistente ? (respExistente.decision_socio || 'PENDIENTE') : 'PENDIENTE';
-        const comentarioDecisionVal = respExistente ? (respExistente.comentario_decision || '') : '';
-
-        let htmlSeleccion = '';
-        if (tieneOpciones) {
-          let opcionesOptions = '<option value="">-- Selecciona una Opción --</option>';
-          opcionesPregunta.forEach(op => {
-            const textoOp = op.texto_opcion || op.opcion || `Opción #${op.id_opcion}`;
-            const selected = (valResultado === textoOp) ? 'selected' : '';
-            opcionesOptions += `<option value="${textoOp}" ${selected}>${textoOp}</option>`;
-          });
-
-          htmlSeleccion = `
-            <div class="mb-3">
-              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Opción Seleccionada</label>
-              <select id="sel-${idPregunta}" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500">
-                ${opcionesOptions}
+      <div class="card-body">
+        <form id="form-auditoria" action="#" method="POST">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="cliente_id" class="form-label fw-semibold">Cliente:</label>
+              <select class="form-select" id="cliente_id" name="cliente_id" required>
+                <option value="">-- Seleccionar Cliente --</option>
+                <option value="CLI-001">Empresa Demo S.A.</option>
+                <option value="CLI-002">Corporación Ejemplo Ltda.</option>
               </select>
             </div>
-          `;
-        }
-
-        contenedor.innerHTML += `
-          <div class="p-4 bg-white border border-slate-200 rounded-xl space-y-3 shadow-sm hover:border-indigo-300 transition flex flex-col justify-between">
-            <div>
-              <div class="flex justify-between items-center mb-2">
-                <span class="text-[10px] font-bold bg-black text-white border border-black px-2 py-0.5 rounded-md">
-                  Pregunta #${idx + 1}
-                </span>
-                <span class="text-[10px] font-bold bg-black text-white border border-black px-2 py-0.5 rounded-md">Año ${anioVal}</span>
-              </div>
-              <p class="text-xs sm:text-sm font-semibold text-slate-800 leading-snug">${textoPregunta}</p>
+            <div class="col-md-3">
+              <label for="anio" class="form-label fw-semibold">Año Evaluado:</label>
+              <input type="number" class="form-control" id="anio" name="anio" value="2026" required>
             </div>
-            
-            <div class="pt-3 border-t border-slate-100 space-y-3">
-              
-              ${htmlSeleccion}
-
-              <!-- 1. RESPUESTA -->
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Respuesta (${anioVal})</label>
-                <textarea id="resp-${idPregunta}" rows="4" placeholder="Escribe la respuesta correspondiente al año ${anioVal}..." class="w-full p-2.5 border border-slate-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50 focus:bg-white leading-relaxed">${valRespuestaText}</textarea>
-              </div>
-
-              <!-- 2. TO/DO -->
-              <div class="p-2.5 bg-slate-100 rounded-lg border border-slate-300 space-y-2">
-                <button onclick="toggleTodo('${idPregunta}')" id="btn-todo-${idPregunta}" 
-                        class="w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center ${
-                          esTodo === 'SI' 
-                          ? 'bg-slate-700 text-white border border-slate-800' 
-                          : 'bg-slate-200 text-slate-800 border border-slate-300 hover:bg-slate-700 hover:text-white'
-                        }">
-                  ${esTodo === 'SI' ? 'Registrado en To/Do' : 'To/Do'}
-                </button>
-                <input type="hidden" id="todo-val-${idPregunta}" value="${esTodo}">
-
-                <div id="panel-todo-fields-${idPregunta}" class="${esTodo === 'SI' ? 'block' : 'hidden'} space-y-2 pt-2 border-t border-slate-300">
-                  <div>
-                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Detalle To/Do</label>
-                    <textarea id="todo-text-${idPregunta}" rows="2" placeholder="Detalle de lo que está pendiente..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white leading-tight">${valTodoText}</textarea>
-                  </div>
-
-                  <div>
-                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Asignado - email</label>
-                    <input type="email" id="todo-email-${idPregunta}" value="${valTodoAsignadoEmail}" placeholder="ejemplo@correo.com" class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white">
-                  </div>
-
-                  <div>
-                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Comentario Ejecutor</label>
-                    <textarea id="todo-comentario-ejecutor-${idPregunta}" rows="2" placeholder="Comentario o avance de quien ejecuta el To/Do..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white leading-tight">${valTodoComentarioEjecutor}</textarea>
-                  </div>
-
-                  <div class="p-2 bg-white rounded border border-slate-200 space-y-2">
-                    <div class="flex items-center gap-2">
-                      <input type="checkbox" id="todo-revisado-${idPregunta}" ${valTodoRevisado ? 'checked' : ''} class="w-4 h-4 text-slate-700 border-slate-300 rounded focus:ring-slate-500">
-                      <label for="todo-revisado-${idPregunta}" class="text-xs font-bold text-slate-700">To/Do Revisado</label>
-                    </div>
-
-                    <div>
-                      <label class="block text-[11px] font-bold text-slate-600 mb-1">Email de quien revisó</label>
-                      <input type="email" id="todo-reviso-email-${idPregunta}" value="${valTodoRevisoEmail}" placeholder="revisor@correo.com" class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-slate-50">
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 3. QUICK LETT -->
-              <div class="p-2.5 bg-orange-50/60 rounded-lg border border-orange-200 space-y-2">
-                <button onclick="marcarQuickLetter('${idPregunta}')" id="btn-ql-${idPregunta}" 
-                        class="w-full py-2 text-xs font-bold rounded-lg transition shadow-sm flex items-center justify-center ${
-                          esQL === 'SI' 
-                          ? 'bg-orange-500 text-white border border-orange-600' 
-                          : 'bg-orange-100 text-orange-800 border border-orange-300 hover:bg-orange-500 hover:text-white'
-                        }">
-                  ${esQL === 'SI' ? 'ACTIVADO EN QUICK LETT' : 'Quick Lett'}
-                </button>
-                <input type="hidden" id="ql-val-${idPregunta}" value="${esQL}">
-                <textarea id="ql-obs-${idPregunta}" rows="2" placeholder="Escribe el detalle del hallazgo para Quick Lett..." class="w-full p-2 border border-orange-200 rounded-md text-xs outline-none focus:ring-1 focus:ring-orange-500 bg-white leading-tight">${valObservacionQL}</textarea>
-              </div>
-
-              <!-- 4. OPINIÓN -->
-              <div class="p-2.5 bg-rose-50/70 rounded-lg border border-rose-200 space-y-2">
-                <button onclick="toggleOpinion('${idPregunta}')" id="btn-op-${idPregunta}" 
-                        class="w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center ${
-                          esOpinion === 'SI' 
-                          ? 'bg-rose-600 text-white border border-rose-700' 
-                          : 'bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-600 hover:text-white'
-                        }">
-                  ${esOpinion === 'SI' ? 'ACTIVADO EN OPINIÓN' : 'Opinión'}
-                </button>
-                <input type="hidden" id="op-val-${idPregunta}" value="${esOpinion}">
-                <textarea id="op-text-${idPregunta}" rows="2" placeholder="Escribe el argumento o razón por la cual va a la opinión..." class="w-full p-2 border border-rose-200 rounded-md text-xs outline-none focus:ring-1 focus:ring-rose-500 bg-white leading-tight">${valOpinionText}</textarea>
-              </div>
-
-              <!-- 5. DECISIÓN FINAL -->
-              <div class="bg-slate-100 p-2.5 rounded-lg border border-slate-300 space-y-2">
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">Decisión Final (A Opinión?)</label>
-                <select id="socio-sel-${idPregunta}" class="w-full p-2 bg-white border border-slate-300 font-semibold text-xs rounded-md outline-none focus:ring-1 focus:ring-indigo-500">
-                  <option value="PENDIENTE" ${decisionSocioVal === 'PENDIENTE' ? 'selected' : ''}>Pendiente de Revisión por el Socio</option>
-                  <option value="VA_OPINION" ${decisionSocioVal === 'VA_OPINION' ? 'selected' : ''}>SI VA a la Opinión Final</option>
-                  <option value="NO_VA" ${decisionSocioVal === 'NO_VA' ? 'selected' : ''}>NO VA (Desestimado / Corregido)</option>
-                </select>
-                <textarea id="socio-comment-${idPregunta}" rows="2" placeholder="Escribe un comentario sobre la decisión final..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-indigo-500 bg-white leading-tight">${comentarioDecisionVal}</textarea>
-              </div>
-
-              <button onclick="guardarPreguntaCompleta('${idPregunta}', ${tieneOpciones})" class="w-full py-2.5 text-xs font-bold rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition shadow">
-                Guardar Evaluación ${anioVal}
-              </button>
-
+            <div class="col-md-3">
+              <label for="pregunta_id" class="form-label fw-semibold">ID Pregunta / Ítem:</label>
+              <input type="text" class="form-control" id="pregunta_id" name="pregunta_id" value="PREG-001" readonly>
             </div>
           </div>
-        `;
-      });
-    }
+      </div>
+    </div>
 
-    async function cargarHistoricoComparativo() {
-      const clienteIdVal = document.getElementById('select-cliente').value;
-      const aspectoIdVal = document.getElementById('select-aspecto').value;
-      const tbody = document.getElementById('tabla-historico-body');
-      const contador = document.getElementById('contador-historico');
+    <!-- PREGUNTA Y SELECCIÓN DE RESULTADO -->
+    <div class="card card-custom">
+      <div class="card-header card-header-custom">
+        2. Cuestionario y Evaluación
+      </div>
+      <div class="card-body">
+        <!-- Texto de la pregunta -->
+        <div class="mb-4">
+          <h5 class="fw-bold text-dark">¿La compañía cuenta con un manual de políticas contables actualizado y aprobado por la junta directiva?</h5>
+          <p class="text-muted small">Sección: B - Evaluación Inicial / Cuestionario Global</p>
+        </div>
 
-      if (!aspectoIdVal || !clienteIdVal) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">Selecciona un cliente y un aspecto arriba para desplegar la comparativa multianual.</td></tr>`;
-        contador.textContent = '0 Preguntas';
-        return;
-      }
-
-      tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-500">Cargando histórico multianual...</td></tr>`;
-
-      let { data: preguntas } = await supabaseClient
-        .from('preguntas_banco')
-        .select('*')
-        .eq('id_aspecto', aspectoIdVal);
-
-      if ((!preguntas || preguntas.length === 0) && !isNaN(aspectoIdVal)) {
-        const resNum = await supabaseClient.from('preguntas_banco').select('*').eq('id_aspecto', Number(aspectoIdVal));
-        if (resNum.data) preguntas = resNum.data;
-      }
-
-      if (!preguntas || preguntas.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-amber-700 bg-amber-50">No hay preguntas registradas para este aspecto.</td></tr>`;
-        contador.textContent = '0 Preguntas';
-        return;
-      }
-
-      const { data: todasLasRespuestas } = await supabaseClient
-        .from('respuestas_auditoria')
-        .select('*')
-        .eq('cliente_id', clienteIdVal);
-
-      contador.textContent = `${preguntas.length} Preguntas`;
-      tbody.innerHTML = '';
-
-      const anios = [2024, 2025, 2026, 2027];
-
-      preguntas.forEach((p, idx) => {
-        const idPregunta = p.id_pregunta || p.id;
-        const textoPregunta = p.texto_pregunta || `Pregunta #${idPregunta}`;
-
-        let celdasAnios = '';
-
-        anios.forEach(a => {
-          const resp = todasLasRespuestas 
-            ? todasLasRespuestas.find(r => String(r.pregunta_id) === String(idPregunta) && Number(r.anio) === a)
-            : null;
-
-          if (!resp) {
-            celdasAnios += `
-              <td class="p-3 border-r border-slate-200 align-top text-center text-slate-300 italic text-[11px]">
-                Sin datos
-              </td>
-            `;
-          } else {
-            let badges = [];
-            
-            if (resp.resultado === 'QUICK_LETTER') {
-              badges.push(`<span class="inline-block bg-orange-100 text-orange-800 font-bold border border-orange-300 px-1.5 py-0.5 rounded text-[10px]">Quick Lett</span>`);
-            } else if (resp.resultado && resp.resultado !== 'REDACCION') {
-              badges.push(`<span class="inline-block bg-indigo-100 text-indigo-800 font-bold border border-indigo-200 px-1.5 py-0.5 rounded text-[10px]">${resp.resultado}</span>`);
-            }
-
-            if (resp.es_todo) {
-              const statusTodo = resp.todo_revisado ? 'To/Do Revisado' : 'To/Do Pendiente';
-              badges.push(`<span class="inline-block bg-slate-200 text-slate-800 font-bold border border-slate-300 px-1.5 py-0.5 rounded text-[10px]">${statusTodo}</span>`);
-            }
-
-            if (resp.es_opinion) {
-              badges.push(`<span class="inline-block bg-rose-100 text-rose-800 font-bold border border-rose-300 px-1.5 py-0.5 rounded text-[10px]">Opinión</span>`);
-            }
-
-            let badgeSocio = '';
-            const comentarioSocio = resp.comentario_decision ? `<div class="italic text-[10px] mt-0.5 text-slate-600">${resp.comentario_decision}</div>` : '';
-
-            if (resp.decision_socio === 'VA_OPINION') {
-              badgeSocio = `<div class="mt-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 p-1 rounded border border-emerald-200">Decisión: SI VA a Opinión ${comentarioSocio}</div>`;
-            } else if (resp.decision_socio === 'NO_VA') {
-              badgeSocio = `<div class="mt-1 text-[10px] font-bold text-slate-500 bg-slate-100 p-1 rounded border border-slate-300">Decisión: NO VA ${comentarioSocio}</div>`;
-            } else {
-              badgeSocio = `<div class="mt-1 text-[10px] font-semibold text-amber-700 bg-amber-50/60 p-1 rounded border border-amber-200">Decisión: Pendiente ${comentarioSocio}</div>`;
-            }
-
-            const respTexto = resp.respuesta || resp.observaciones || '';
-            const obsQLTexto = resp.observaciones_ql ? `<div class="text-[10px] text-orange-800 bg-orange-50 p-1 rounded border border-orange-200 mt-1"><strong>Quick Lett:</strong> ${resp.observaciones_ql}</div>` : '';
-            
-            let todoTexto = '';
-            if (resp.es_todo) {
-              todoTexto = `
-                <div class="text-[10px] text-slate-700 bg-slate-100 p-1.5 rounded border border-slate-200 mt-1 space-y-0.5">
-                  <div><strong>To/Do:</strong> ${resp.detalle_todo || 'Sin detalle'}</div>
-                  ${resp.todo_asignado_email ? `<div><strong>Asignado:</strong> ${resp.todo_asignado_email}</div>` : ''}
-                  ${resp.todo_comentario_ejecutor ? `<div><strong>Ejecutor:</strong> ${resp.todo_comentario_ejecutor}</div>` : ''}
-                  ${resp.todo_revisado ? `<div class="text-emerald-700 font-bold">✓ Revisado por: ${resp.todo_reviso_email || 'S/E'}</div>` : ''}
-                </div>
-              `;
-            }
-
-            const opTexto = resp.detalle_opinion ? `<div class="text-[10px] text-rose-800 bg-rose-50 p-1 rounded border border-rose-200 mt-1"><strong>Opinión:</strong> ${resp.detalle_opinion}</div>` : '';
-
-            celdasAnios += `
-              <td class="p-3 border-r border-slate-200 align-top text-xs space-y-1">
-                <div class="flex flex-wrap gap-1 mb-1">${badges.join(' ')}</div>
-                ${respTexto ? `<div class="text-[11px] text-slate-700 leading-snug whitespace-pre-line"><strong>Respuesta:</strong> ${respTexto}</div>` : ''}
-                ${obsQLTexto}
-                ${todoTexto}
-                ${opTexto}
-                ${badgeSocio}
-              </td>
-            `;
-          }
-        });
-
-        tbody.innerHTML += `
-          <tr class="hover:bg-slate-50 transition">
-            <td class="p-3 font-semibold text-slate-800 border-r border-slate-200 align-top leading-relaxed">
-              <span class="inline-block bg-black text-white font-bold text-[10px] border border-black px-2 py-0.5 rounded mb-1">
-                Pregunta #${idx + 1}
-              </span>
-              <div class="mt-1">${textoPregunta}</div>
-            </td>
-            ${celdasAnios}
-          </tr>
-        `;
-      });
-    }
-
-    async function cargarResumenQuickLett() {
-      const clienteIdVal = document.getElementById('select-cliente').value;
-      const contenedor = document.getElementById('contenedor-resumen-ql');
-      const contador = document.getElementById('contador-ql');
-
-      if (!clienteIdVal) {
-        contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">Por favor selecciona un cliente arriba.</p>';
-        contador.textContent = '0 Hallazgos';
-        return;
-      }
-
-      contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-6">Cargando acumulado de Quick Lett...</p>';
-
-      const { data: qlData, error } = await supabaseClient
-        .from('respuestas_auditoria')
-        .select('*')
-        .eq('cliente_id', clienteIdVal)
-        .eq('resultado', 'QUICK_LETTER');
-
-      if (error || !qlData || qlData.length === 0) {
-        contenedor.innerHTML = '<div class="col-span-full p-6 text-center text-slate-500 bg-slate-50 rounded-xl border border-slate-200 text-xs">No se encontraron hallazgos registrados en Quick Lett para este cliente.</div>';
-        contador.textContent = '0 Hallazgos';
-        return;
-      }
-
-      const { data: preguntasBanco } = await supabaseClient.from('preguntas_banco').select('*');
-
-      contador.textContent = `${qlData.length} Hallazgos Acumulados`;
-      contenedor.innerHTML = '';
-
-      qlData.forEach((item) => {
-        const pregObj = preguntasBanco ? preguntasBanco.find(p => String(p.id_pregunta || p.id) === String(item.pregunta_id)) : null;
-        const textoPregunta = pregObj ? (pregObj.texto_pregunta || `Pregunta #${item.pregunta_id}`) : `Pregunta #${item.pregunta_id}`;
-
-        contenedor.innerHTML += `
-          <div class="p-4 bg-orange-50/40 border border-orange-200 rounded-xl space-y-2 shadow-xs">
-            <div class="flex justify-between items-center">
-              <span class="text-[10px] font-bold text-white bg-black border border-black px-2 py-0.5 rounded-md">
-                Año ${item.anio}
-              </span>
-              <span class="text-[10px] font-semibold text-slate-400">ID Pregunta: #${item.pregunta_id}</span>
+        <!-- Opciones de Selección Única / Múltiple para Resultado -->
+        <div class="mb-4">
+          <label class="form-label fw-bold">Resultado de la Evaluación:</label>
+          <div class="d-flex flex-wrap gap-3">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="resultado" id="res-cumple" value="Cumple" required>
+              <label class="form-check-label" for="res-cumple">Cumple</label>
             </div>
-            <p class="text-xs font-bold text-slate-800">${textoPregunta}</p>
-            <div class="pt-2 border-t border-orange-200/60">
-              <span class="block text-[10px] font-bold text-orange-700 uppercase">Detalle / Hallazgo Quick Lett:</span>
-              <p class="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed">${item.observaciones_ql || item.respuesta || 'Sin detalle ingresado.'}</p>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="resultado" id="res-nocumple" value="No Cumple">
+              <label class="form-check-label" for="res-nocumple">No Cumple</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="resultado" id="res-parcial" value="Cumple Parcialmente">
+              <label class="form-check-label" for="res-parcial">Cumple Parcialmente</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="resultado" id="res-noaplica" value="No Aplica">
+              <label class="form-check-label" for="res-noaplica">No Aplica</label>
             </div>
           </div>
-        `;
-      });
-    }
+        </div>
 
-    async function cargarResumenOpinion() {
-      const clienteIdVal = document.getElementById('select-cliente').value;
-      const contenedor = document.getElementById('contenedor-resumen-opinion');
-      const contador = document.getElementById('contador-opinion');
-      const badgeEstado = document.getElementById('estado-global-opinion');
+        <!-- Observaciones o Comentarios -->
+        <div class="mb-3">
+          <label for="comentario" class="form-label fw-semibold">Observaciones / Comentario del Auditor:</label>
+          <textarea class="form-control" id="comentario" name="comentario" rows="3" placeholder="Ingrese el detalle o soporte de la prueba realizada..."></textarea>
+        </div>
+      </div>
+    </div>
 
-      if (!clienteIdVal) {
-        contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">Por favor selecciona un cliente arriba.</p>';
-        contador.textContent = '0 Casos';
-        badgeEstado.textContent = 'Sin Estado';
-        badgeEstado.className = 'text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-md';
-        return;
-      }
-
-      contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-6">Cargando acumulado de Puntos para Opinión...</p>';
-
-      const { data: opData, error } = await supabaseClient
-        .from('respuestas_auditoria')
-        .select('*')
-        .eq('cliente_id', clienteIdVal)
-        .eq('es_opinion', true);
-
-      if (error || !opData || opData.length === 0) {
-        contenedor.innerHTML = '<div class="col-span-full p-6 text-center text-slate-500 bg-slate-50 rounded-xl border border-slate-200 text-xs">No hay puntos marcados para Opinión en este cliente.</div>';
-        contador.textContent = '0 Casos';
-        badgeEstado.textContent = 'Estado: Satisfactorio (Sin Observaciones)';
-        badgeEstado.className = 'text-xs font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 rounded-md';
-        return;
-      }
-
-      const vanAOpinion = opData.filter(i => i.decision_socio === 'VA_OPINION').length;
-      
-      if (vanAOpinion > 0) {
-        badgeEstado.textContent = `Estado: Con Observaciones (${vanAOpinion} van a Opinión)`;
-        badgeEstado.className = 'text-xs font-bold text-rose-800 bg-rose-100 border border-rose-300 px-2.5 py-0.5 rounded-md';
-      } else {
-        badgeEstado.textContent = 'Estado: En Revisión / Pendiente';
-        badgeEstado.className = 'text-xs font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2.5 py-0.5 rounded-md';
-      }
-
-      const { data: preguntasBanco } = await supabaseClient.from('preguntas_banco').select('*');
-
-      contador.textContent = `${opData.length} Casos Acumulados`;
-      contenedor.innerHTML = '';
-
-      opData.forEach((item) => {
-        const pregObj = preguntasBanco ? preguntasBanco.find(p => String(p.id_pregunta || p.id) === String(item.pregunta_id)) : null;
-        const textoPregunta = pregObj ? (pregObj.texto_pregunta || `Pregunta #${item.pregunta_id}`) : `Pregunta #${item.pregunta_id}`;
-
-        let badgeDecision = '';
-        if (item.decision_socio === 'VA_OPINION') {
-          badgeDecision = '<span class="text-[10px] font-bold text-rose-800 bg-rose-100 border border-rose-300 px-2 py-0.5 rounded-md">SI VA a Opinión</span>';
-        } else if (item.decision_socio === 'NO_VA') {
-          badgeDecision = '<span class="text-[10px] font-bold text-slate-700 bg-slate-200 border border-slate-300 px-2 py-0.5 rounded-md">NO VA</span>';
-        } else {
-          badgeDecision = '<span class="text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-md">Pendiente de Revisión</span>';
-        }
-
-        const comentarioSocio = item.comentario_decision ? `<div class="mt-2 text-xs bg-white p-2 rounded border border-rose-200 text-slate-700"><strong>Comentario Decisión:</strong> ${item.comentario_decision}</div>` : '';
-
-        contenedor.innerHTML += `
-          <div class="p-4 bg-rose-50/40 border border-rose-200 rounded-xl space-y-2 shadow-xs">
-            <div class="flex justify-between items-center">
-              <span class="text-[10px] font-bold text-white bg-black border border-black px-2 py-0.5 rounded-md">
-                Año ${item.anio}
-              </span>
-              ${badgeDecision}
-            </div>
-            <p class="text-xs font-bold text-slate-800">${textoPregunta}</p>
-            <div class="pt-2 border-t border-rose-200/60">
-              <span class="block text-[10px] font-bold text-rose-700 uppercase">Argumento de Opinión:</span>
-              <p class="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed">${item.detalle_opinion || 'Sin argumento ingresado.'}</p>
-              ${comentarioSocio}
+    <!-- SECCIÓN DE SEGUIMIENTO Y ASUNTOS ESPECIALES (TO/DO, QUICK-LETT, OPINIÓN) -->
+    <div class="card card-custom">
+      <div class="card-header card-header-custom">
+        3. Marcas y Seguimiento de Auditoría
+      </div>
+      <div class="card-body">
+        
+        <!-- Marcas / Banderas -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="es_quick_lett" name="es_quick_lett" value="true">
+              <label class="form-check-label fw-semibold" for="es_quick_lett">Marcar para Quick-Lett</label>
             </div>
           </div>
-        `;
-      });
-    }
+          <div class="col-md-4">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="es_opinion" name="es_opinion" value="true">
+              <label class="form-check-label fw-semibold" for="es_opinion">Impacta en Opinión</label>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="es_todo" name="es_todo" value="true">
+              <label class="form-check-label fw-semibold" for="es_todo">Generar Pendiente (To/Do)</label>
+            </div>
+          </div>
+        </div>
 
-    function marcarQuickLetter(preguntaId) {
-      const btn = document.getElementById(`btn-ql-${preguntaId}`);
-      const valInput = document.getElementById(`ql-val-${preguntaId}`);
+        <!-- DETALLE DEL TO/DO (NUEVO CAMPO INCORPORADO) -->
+        <div class="section-todo">
+          <h6 class="todo-title mb-3">📌 Detalle de Acción Pendiente (To/Do)</h6>
+          
+          <div class="mb-3">
+            <label for="todo_descripcion" class="form-label fw-semibold">Detalle To/Do:</label>
+            <textarea class="form-control" id="todo_descripcion" name="todo_descripcion" rows="2" placeholder="Escriba qué tarea o información queda pendiente por verificar..."></textarea>
+          </div>
 
-      if (valInput.value === 'NO') {
-        valInput.value = 'SI';
-        btn.className = 'w-full py-2 text-xs font-bold rounded-lg transition shadow-sm flex items-center justify-center bg-orange-500 text-white border border-orange-600';
-        btn.innerHTML = 'ACTIVADO EN QUICK LETT';
-      } else {
-        valInput.value = 'NO';
-        btn.className = 'w-full py-2 text-xs font-bold rounded-lg transition shadow-sm flex items-center justify-center bg-orange-100 text-orange-800 border border-orange-300 hover:bg-orange-500 hover:text-white';
-        btn.innerHTML = 'Quick Lett';
-      }
-    }
+          <!-- NUEVO CAMPO: A REALIZAR TO/DO (SELECCIÓN DE VISITAS) -->
+          <div class="mb-3 bg-white p-3 border rounded">
+            <label class="form-label fw-bold text-dark">A Realizar To/Do en:</label>
+            <div class="d-flex gap-4 ms-2">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="todo_visita" id="chk_visita_preliminar" value="Visita Preliminar">
+                <label class="form-check-label fw-semibold" for="chk_visita_preliminar">
+                  Visita Preliminar
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="todo_visita" id="chk_visita_final" value="Visita Final">
+                <label class="form-check-label fw-semibold" for="chk_visita_final">
+                  Visita Final
+                </label>
+              </div>
+            </div>
+          </div>
 
-    function toggleTodo(preguntaId) {
-      const btn = document.getElementById(`btn-todo-${preguntaId}`);
-      const valInput = document.getElementById(`todo-val-${preguntaId}`);
-      const panelFields = document.getElementById(`panel-todo-fields-${preguntaId}`);
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="todo_prioridad" class="form-label fw-semibold">Prioridad:</label>
+              <select class="form-select" id="todo_prioridad" name="todo_prioridad">
+                <option value="Baja">Baja</option>
+                <option value="Media" selected>Media</option>
+                <option value="Alta">Alta</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="todo_asignado" class="form-label fw-semibold">Asignado a (Correo):</label>
+              <input type="email" class="form-control" id="todo_asignado" name="todo_asignado" placeholder="auditor@firma.com">
+            </div>
+          </div>
+        </div>
 
-      if (valInput.value === 'NO') {
-        valInput.value = 'SI';
-        btn.className = 'w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center bg-slate-700 text-white border border-slate-800';
-        btn.innerHTML = 'Registrado en To/Do';
-        panelFields.classList.remove('hidden');
-        panelFields.classList.add('block');
-      } else {
-        valInput.value = 'NO';
-        btn.className = 'w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center bg-slate-200 text-slate-800 border border-slate-300 hover:bg-slate-700 hover:text-white';
-        btn.innerHTML = 'To/Do';
-        panelFields.classList.remove('block');
-        panelFields.classList.add('hidden');
-      }
-    }
+        <!-- BOTÓN DE GUARDAR -->
+        <div class="mt-4 text-end">
+          <button type="reset" class="btn btn-outline-secondary me-2">Limpiar Formulario</button>
+          <button type="submit" class="btn btn-primary px-4 fw-bold">Guardar Respuesta</button>
+        </div>
 
-    function toggleOpinion(preguntaId) {
-      const btn = document.getElementById(`btn-op-${preguntaId}`);
-      const valInput = document.getElementById(`op-val-${preguntaId}`);
+        </form> <!-- FIN DEL FORMULARIO -->
+      </div>
+    </div>
 
-      if (valInput.value === 'NO') {
-        valInput.value = 'SI';
-        btn.className = 'w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center bg-rose-600 text-white border border-rose-700';
-        btn.innerHTML = 'ACTIVADO EN OPINIÓN';
-      } else {
-        valInput.value = 'NO';
-        btn.className = 'w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-600 hover:text-white';
-        btn.innerHTML = 'Opinión';
-      }
-    }
+  </div>
 
-    async function guardarPreguntaCompleta(preguntaId, tieneOpciones) {
-      const clienteId = document.getElementById('select-cliente').value;
-      const anioSeleccionado = Number(document.getElementById('select-anio').value);
-      const respuestaText = document.getElementById(`resp-${preguntaId}`).value;
-      const esQuickLetter = document.getElementById(`ql-val-${preguntaId}`).value;
-      const observacionQLText = document.getElementById(`ql-obs-${preguntaId}`).value;
-      
-      const esTodoVal = document.getElementById(`todo-val-${preguntaId}`).value === 'SI';
-      const detalleTodoText = document.getElementById(`todo-text-${preguntaId}`).value;
-      const todoAsignadoEmailVal = document.getElementById(`todo-email-${preguntaId}`).value;
-      const todoComentarioEjecutorVal = document.getElementById(`todo-comentario-ejecutor-${preguntaId}`).value;
-      const todoRevisadoVal = document.getElementById(`todo-revisado-${preguntaId}`).checked;
-      const todoRevisoEmailVal = document.getElementById(`todo-reviso-email-${preguntaId}`).value;
-
-      const esOpinionVal = document.getElementById(`op-val-${preguntaId}`).value === 'SI';
-      const detalleOpinionText = document.getElementById(`op-text-${preguntaId}`).value;
-
-      const decisionSocioVal = document.getElementById(`socio-sel-${preguntaId}`).value;
-      const comentarioDecisionVal = document.getElementById(`socio-comment-${preguntaId}`).value;
-
-      let opcionSeleccionada = null;
-      if (tieneOpciones) {
-        opcionSeleccionada = document.getElementById(`sel-${preguntaId}`).value;
-      }
-
-      if (!clienteId) {
-        alert('Por favor selecciona un Cliente en la parte superior.');
-        return;
-      }
-
-      let resultadoFinal = 'REDACCION';
-      if (esQuickLetter === 'SI') {
-        resultadoFinal = 'QUICK_LETTER';
-      } else if (opcionSeleccionada) {
-        resultadoFinal = opcionSeleccionada;
-      }
-
-      await supabaseClient
-        .from('respuestas_auditoria')
-        .delete()
-        .eq('cliente_id', clienteId)
-        .eq('pregunta_id', preguntaId)
-        .eq('anio', anioSeleccionado);
-
-      const { error } = await supabaseClient
-        .from('respuestas_auditoria')
-        .insert([
-          { 
-            cliente_id: clienteId, 
-            pregunta_id: preguntaId, 
-            resultado: resultadoFinal, 
-            respuesta: respuestaText,
-            observaciones: respuestaText,
-            observaciones_ql: observacionQLText,
-            anio: anioSeleccionado,
-            es_todo: esTodoVal,
-            detalle_todo: detalleTodoText,
-            todo_asignado_email: todoAsignadoEmailVal,
-            todo_comentario_ejecutor: todoComentarioEjecutorVal,
-            todo_revisado: todoRevisadoVal,
-            todo_reviso_email: todoRevisoEmailVal,
-            es_opinion: esOpinionVal,
-            detalle_opinion: detalleOpinionText,
-            decision_socio: decisionSocioVal,
-            comentario_decision: comentarioDecisionVal
-          }
-        ]);
-
-      if (error) {
-        alert('Error al guardar evaluación: ' + error.message);
-      } else {
-        alert(`Evaluación completa guardada con éxito para el Año ${anioSeleccionado}.`);
-      }
-    }
-
-    iniciar();
-  </script>
 </body>
 </html>
