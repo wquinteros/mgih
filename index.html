@@ -3,214 +3,231 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MGI H - Módulo de Respuestas de Auditoría</title>
-  <!-- Framework CSS opcional para estilos limpios (Bootstrap 5) -->
+  <title>MGI H — Herramientas de Auditoría</title>
+  
+  <!-- Estilos Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- CDN Oficial de Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
-    body {
-      background-color: #f8f9fa;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding-bottom: 50px;
-    }
-    .header-mgi {
-      background-color: #1a365d;
-      color: white;
-      padding: 20px 0;
-      margin-bottom: 30px;
-      border-bottom: 4px solid #c59b27;
-    }
-    .card-custom {
-      border: none;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
-    }
-    .card-header-custom {
-      background-color: #f1f5f9;
-      font-weight: bold;
-      color: #1a365d;
-      border-bottom: 2px solid #cbd5e1;
-    }
-    .section-todo {
-      background-color: #fffbeb;
-      border: 1px solid #fde68a;
-      border-radius: 8px;
-      padding: 15px;
-      margin-top: 15px;
-    }
-    .todo-title {
-      color: #92400e;
-      font-weight: bold;
-    }
+    body { background-color: #f8f9fa; padding-bottom: 50px; font-family: 'Segoe UI', sans-serif; }
+    .header-mgi { background-color: #1a365d; color: white; padding: 20px 0; border-bottom: 4px solid #c59b27; }
+    .card-custom { border: none; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    .card-header-custom { background-color: #f1f5f9; font-weight: bold; color: #1a365d; }
+    .box-todo { background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 15px; margin-top: 15px; }
   </style>
 </head>
 <body>
 
-  <!-- CABECERA PRINCIPAL -->
-  <header class="header-mgi text-center">
+  <!-- HEADER -->
+  <header class="header-mgi text-center mb-4">
     <div class="container">
-      <h2 class="m-0 fw-bold">MGI H — HERRAMIENTAS DE AUDITORÍA</h2>
-      <p class="m-0 text-light opacity-75">Cuestionario Global y Registro de Evaluaciones</p>
+      <h3 class="m-0 fw-bold">MGI H — HERRAMIENTAS DE AUDITORÍA</h3>
+      <small class="text-light opacity-75">Cuestionario y Registro de Evaluaciones</small>
     </div>
   </header>
 
   <div class="container">
-    
-    <!-- DATOS CABECERA DE EVALUACIÓN -->
+
+    <!-- FILTRO CLIENTE Y AÑO -->
     <div class="card card-custom">
-      <div class="card-header card-header-custom">
-        1. Contexto de la Evaluación
-      </div>
+      <div class="card-header card-header-custom">1. Datos de Auditoría</div>
       <div class="card-body">
-        <form id="form-auditoria" action="#" method="POST">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label for="cliente_id" class="form-label fw-semibold">Cliente:</label>
-              <select class="form-select" id="cliente_id" name="cliente_id" required>
-                <option value="">-- Seleccionar Cliente --</option>
-                <option value="CLI-001">Empresa Demo S.A.</option>
-                <option value="CLI-002">Corporación Ejemplo Ltda.</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <label for="anio" class="form-label fw-semibold">Año Evaluado:</label>
-              <input type="number" class="form-control" id="anio" name="anio" value="2026" required>
-            </div>
-            <div class="col-md-3">
-              <label for="pregunta_id" class="form-label fw-semibold">ID Pregunta / Ítem:</label>
-              <input type="text" class="form-control" id="pregunta_id" name="pregunta_id" value="PREG-001" readonly>
-            </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="select-cliente" class="form-label fw-bold">Cliente:</label>
+            <select id="select-cliente" class="form-select">
+              <option value="">-- Seleccionar Cliente --</option>
+            </select>
           </div>
+          <div class="col-md-3">
+            <label for="select-anio" class="form-label fw-bold">Año:</label>
+            <input type="number" id="select-anio" class="form-control" value="2026">
+          </div>
+          <div class="col-md-3 d-flex align-items-end">
+            <button id="btn-cargar" class="btn btn-primary w-100 fw-bold" onclick="cargarPregunta()">Cargar Cuestionario</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- PREGUNTA Y SELECCIÓN DE RESULTADO -->
+    <!-- PREGUNTA Y RESPUESTA -->
     <div class="card card-custom">
-      <div class="card-header card-header-custom">
-        2. Cuestionario y Evaluación
-      </div>
+      <div class="card-header card-header-custom">2. Evaluaciones</div>
       <div class="card-body">
-        <!-- Texto de la pregunta -->
+        
         <div class="mb-4">
-          <h5 class="fw-bold text-dark">¿La compañía cuenta con un manual de políticas contables actualizado y aprobado por la junta directiva?</h5>
-          <p class="text-muted small">Sección: B - Evaluación Inicial / Cuestionario Global</p>
+          <h5 id="pregunta-titulo" class="fw-bold text-dark">Pregunta de Evaluación</h5>
+          <p id="pregunta-subtexto" class="text-muted small">Seleccione una opción de respuesta</p>
         </div>
 
-        <!-- Opciones de Selección Única / Múltiple para Resultado -->
+        <!-- OPCIONES DE RESPUESTA DE AUDITORÍA -->
         <div class="mb-4">
-          <label class="form-label fw-bold">Resultado de la Evaluación:</label>
-          <div class="d-flex flex-wrap gap-3">
+          <label class="form-label fw-bold">Resultado:</label>
+          <div class="d-flex flex-wrap gap-3" id="opciones-resultado">
             <div class="form-check">
-              <input class="form-check-input" type="radio" name="resultado" id="res-cumple" value="Cumple" required>
+              <input class="form-check-input" type="radio" name="radio-resultado" id="res-cumple" value="Cumple">
               <label class="form-check-label" for="res-cumple">Cumple</label>
             </div>
             <div class="form-check">
-              <input class="form-check-input" type="radio" name="resultado" id="res-nocumple" value="No Cumple">
+              <input class="form-check-input" type="radio" name="radio-resultado" id="res-nocumple" value="No Cumple">
               <label class="form-check-label" for="res-nocumple">No Cumple</label>
             </div>
             <div class="form-check">
-              <input class="form-check-input" type="radio" name="resultado" id="res-parcial" value="Cumple Parcialmente">
+              <input class="form-check-input" type="radio" name="radio-resultado" id="res-parcial" value="Cumple Parcialmente">
               <label class="form-check-label" for="res-parcial">Cumple Parcialmente</label>
             </div>
             <div class="form-check">
-              <input class="form-check-input" type="radio" name="resultado" id="res-noaplica" value="No Aplica">
+              <input class="form-check-input" type="radio" name="radio-resultado" id="res-noaplica" value="No Aplica">
               <label class="form-check-label" for="res-noaplica">No Aplica</label>
             </div>
           </div>
         </div>
 
-        <!-- Observaciones o Comentarios -->
+        <!-- OBSERVACIONES -->
         <div class="mb-3">
-          <label for="comentario" class="form-label fw-semibold">Observaciones / Comentario del Auditor:</label>
-          <textarea class="form-control" id="comentario" name="comentario" rows="3" placeholder="Ingrese el detalle o soporte de la prueba realizada..."></textarea>
+          <label for="input-comentario" class="form-label fw-bold">Observaciones / Comentarios del Auditor:</label>
+          <textarea id="input-comentario" class="form-control" rows="3" placeholder="Ingrese el detalle o justificación de la prueba..."></textarea>
         </div>
+
       </div>
     </div>
 
-    <!-- SECCIÓN DE SEGUIMIENTO Y ASUNTOS ESPECIALES (TO/DO, QUICK-LETT, OPINIÓN) -->
+    <!-- MARCAS Y TO/DO -->
     <div class="card card-custom">
-      <div class="card-header card-header-custom">
-        3. Marcas y Seguimiento de Auditoría
-      </div>
+      <div class="card-header card-header-custom">3. Seguimiento y Control</div>
       <div class="card-body">
-        
-        <!-- Marcas / Banderas -->
+
         <div class="row g-3 mb-3">
           <div class="col-md-4">
             <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="es_quick_lett" name="es_quick_lett" value="true">
-              <label class="form-check-label fw-semibold" for="es_quick_lett">Marcar para Quick-Lett</label>
+              <input class="form-check-input" type="checkbox" id="chk-quicklett">
+              <label class="form-check-label fw-bold" for="chk-quicklett">Marcar Quick-Lett</label>
             </div>
           </div>
           <div class="col-md-4">
             <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="es_opinion" name="es_opinion" value="true">
-              <label class="form-check-label fw-semibold" for="es_opinion">Impacta en Opinión</label>
+              <input class="form-check-input" type="checkbox" id="chk-opinion">
+              <label class="form-check-label fw-bold" for="chk-opinion">Impacta en Opinión</label>
             </div>
           </div>
           <div class="col-md-4">
             <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="es_todo" name="es_todo" value="true">
-              <label class="form-check-label fw-semibold" for="es_todo">Generar Pendiente (To/Do)</label>
+              <input class="form-check-input" type="checkbox" id="chk-es-todo">
+              <label class="form-check-label fw-bold" for="chk-es-todo">Generar Pendiente (To/Do)</label>
             </div>
           </div>
         </div>
 
-        <!-- DETALLE DEL TO/DO (NUEVO CAMPO INCORPORADO) -->
-        <div class="section-todo">
-          <h6 class="todo-title mb-3">📌 Detalle de Acción Pendiente (To/Do)</h6>
-          
-          <div class="mb-3">
-            <label for="todo_descripcion" class="form-label fw-semibold">Detalle To/Do:</label>
-            <textarea class="form-control" id="todo_descripcion" name="todo_descripcion" rows="2" placeholder="Escriba qué tarea o información queda pendiente por verificar..."></textarea>
-          </div>
+        <!-- SECCIÓN DE DETALLE TO/DO -->
+        <div class="box-todo">
+          <label for="todo-detalle" class="form-label fw-bold text-dark">Detalle To/Do:</label>
+          <textarea id="todo-detalle" class="form-control mb-3" rows="2" placeholder="Describa la tarea o acción pendiente..."></textarea>
 
-          <!-- NUEVO CAMPO: A REALIZAR TO/DO (SELECCIÓN DE VISITAS) -->
+          <!-- NUEVA SECCIÓN DE SELECCIÓN DE VISITAS (SOLICITADA) -->
           <div class="mb-3 bg-white p-3 border rounded">
-            <label class="form-label fw-bold text-dark">A Realizar To/Do en:</label>
+            <label class="form-label fw-bold text-primary">A Realizar To/Do en:</label>
             <div class="d-flex gap-4 ms-2">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="todo_visita" id="chk_visita_preliminar" value="Visita Preliminar">
-                <label class="form-check-label fw-semibold" for="chk_visita_preliminar">
-                  Visita Preliminar
-                </label>
+                <input class="form-check-input" type="checkbox" id="chk-visita-preliminar" value="Visita Preliminar">
+                <label class="form-check-label fw-semibold" for="chk-visita-preliminar">Visita Preliminar</label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="todo_visita" id="chk_visita_final" value="Visita Final">
-                <label class="form-check-label fw-semibold" for="chk_visita_final">
-                  Visita Final
-                </label>
+                <input class="form-check-input" type="checkbox" id="chk-visita-final" value="Visita Final">
+                <label class="form-check-label fw-semibold" for="chk-visita-final">Visita Final</label>
               </div>
             </div>
           </div>
 
           <div class="row g-3">
             <div class="col-md-6">
-              <label for="todo_prioridad" class="form-label fw-semibold">Prioridad:</label>
-              <select class="form-select" id="todo_prioridad" name="todo_prioridad">
+              <label for="todo-prioridad" class="form-label fw-bold">Prioridad:</label>
+              <select id="todo-prioridad" class="form-select">
                 <option value="Baja">Baja</option>
                 <option value="Media" selected>Media</option>
                 <option value="Alta">Alta</option>
               </select>
             </div>
             <div class="col-md-6">
-              <label for="todo_asignado" class="form-label fw-semibold">Asignado a (Correo):</label>
-              <input type="email" class="form-control" id="todo_asignado" name="todo_asignado" placeholder="auditor@firma.com">
+              <label for="todo-asignado" class="form-label fw-bold">Asignado a (Email):</label>
+              <input type="email" id="todo-asignado" class="form-control" placeholder="auditor@firma.com">
             </div>
           </div>
         </div>
 
-        <!-- BOTÓN DE GUARDAR -->
+        <!-- BOTÓN GUARDAR -->
         <div class="mt-4 text-end">
-          <button type="reset" class="btn btn-outline-secondary me-2">Limpiar Formulario</button>
-          <button type="submit" class="btn btn-primary px-4 fw-bold">Guardar Respuesta</button>
+          <button id="btn-guardar" class="btn btn-success px-4 fw-bold" onclick="guardarEvaluacion()">Guardar Evaluación</button>
         </div>
 
-        </form> <!-- FIN DEL FORMULARIO -->
       </div>
     </div>
 
   </div>
+
+  <!-- LÓGICA CONEXIÓN SUPABASE -->
+  <script>
+    // CREDENCIALES DE SUPABASE
+    const SUPABASE_URL = "https://tu-proyecto.supabase.co"; 
+    const SUPABASE_KEY = "tu-anon-key";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let preguntaActualId = "PREG-001"; // ID de prueba/referencia
+
+    // OBTIENE LAS CASILLAS SELECCIONADAS (Visita Preliminar, Visita Final o Ambas)
+    function obtenerVisitaToDo() {
+      const preliminar = document.getElementById('chk-visita-preliminar').checked;
+      const final = document.getElementById('chk-visita-final').checked;
+      
+      let opciones = [];
+      if (preliminar) opciones.push('Visita Preliminar');
+      if (final) opciones.push('Visita Final');
+      
+      return opciones.join(', ');
+    }
+
+    // FUNCIÓN DE GUARDADO EN LA BASE DE DATOS SUPABASE
+    async function guardarEvaluacion() {
+      const clienteId = document.getElementById('select-cliente').value;
+      const anioVal = document.getElementById('select-anio').value;
+
+      if (!clienteId) {
+        alert("Por favor seleccione un cliente antes de guardar.");
+        return;
+      }
+
+      // Obtener la opción elegida en los radio buttons
+      const radioSel = document.querySelector('input[name="radio-resultado"]:checked');
+      const resultadoVal = radioSel ? radioSel.value : '';
+
+      const datosAGuardar = {
+        cliente_id: clienteId,
+        pregunta_id: preguntaActualId,
+        anio: parseInt(anioVal),
+        resultado: resultadoVal,
+        comentario: document.getElementById('input-comentario').value,
+        es_quick_lett: document.getElementById('chk-quicklett').checked,
+        es_opinion: document.getElementById('chk-opinion').checked,
+        es_todo: document.getElementById('chk-es-todo').checked,
+        todo_descripcion: document.getElementById('todo-detalle').value,
+        todo_visita: obtenerVisitaToDo(), // <--- GUARDA "Visita Preliminar", "Visita Final" O AMBAS
+        todo_prioridad: document.getElementById('todo-prioridad').value,
+        todo_asignado_email: document.getElementById('todo-asignado').value
+      };
+
+      const { data, error } = await supabaseClient
+        .from('respuestas_auditoria')
+        .upsert(datosAGuardar, { onConflict: 'cliente_id, pregunta_id, anio' });
+
+      if (error) {
+        alert('Error al guardar en Supabase: ' + error.message);
+      } else {
+        alert('¡Evaluación registrada correctamente!');
+      }
+    }
+  </script>
 
 </body>
 </html>
