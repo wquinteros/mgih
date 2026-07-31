@@ -158,6 +158,10 @@
 
     let pestanaActual = 'captura';
 
+    document.addEventListener("DOMContentLoaded", function() {
+      iniciar();
+    });
+
     async function iniciar() {
       await cargarClientes();
       await cargarAspectos();
@@ -271,6 +275,56 @@
       }
     }
 
+    function toggleTodo(idPregunta) {
+      const btn = document.getElementById(`btn-todo-${idPregunta}`);
+      const hiddenVal = document.getElementById(`todo-val-${idPregunta}`);
+      const panelFields = document.getElementById(`panel-todo-fields-${idPregunta}`);
+
+      if (hiddenVal.value === 'SI') {
+        hiddenVal.value = 'NO';
+        btn.textContent = 'To/Do';
+        btn.className = 'w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center bg-slate-200 text-slate-800 border border-slate-300 hover:bg-slate-700 hover:text-white';
+        panelFields.classList.add('hidden');
+        panelFields.classList.remove('block');
+      } else {
+        hiddenVal.value = 'SI';
+        btn.textContent = 'Registrado en To/Do';
+        btn.className = 'w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center bg-slate-700 text-white border border-slate-800';
+        panelFields.classList.remove('hidden');
+        panelFields.classList.add('block');
+      }
+    }
+
+    function marcarQuickLetter(idPregunta) {
+      const btn = document.getElementById(`btn-ql-${idPregunta}`);
+      const hiddenVal = document.getElementById(`ql-val-${idPregunta}`);
+
+      if (hiddenVal.value === 'SI') {
+        hiddenVal.value = 'NO';
+        btn.textContent = 'Quick Lett';
+        btn.className = 'w-full py-2 text-xs font-bold rounded-lg transition shadow-sm flex items-center justify-center bg-orange-100 text-orange-800 border border-orange-300 hover:bg-orange-500 hover:text-white';
+      } else {
+        hiddenVal.value = 'SI';
+        btn.textContent = 'ACTIVADO EN QUICK LETT';
+        btn.className = 'w-full py-2 text-xs font-bold rounded-lg transition shadow-sm flex items-center justify-center bg-orange-500 text-white border border-orange-600';
+      }
+    }
+
+    function toggleOpinion(idPregunta) {
+      const btn = document.getElementById(`btn-op-${idPregunta}`);
+      const hiddenVal = document.getElementById(`op-val-${idPregunta}`);
+
+      if (hiddenVal.value === 'SI') {
+        hiddenVal.value = 'NO';
+        btn.textContent = 'Opinión';
+        btn.className = 'w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-600 hover:text-white';
+      } else {
+        hiddenVal.value = 'SI';
+        btn.textContent = 'ACTIVADO EN OPINIÓN';
+        btn.className = 'w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center bg-rose-600 text-white border border-rose-700';
+      }
+    }
+
     async function cargarPreguntas() {
       const clienteIdVal = document.getElementById('select-cliente').value;
       const anioVal = document.getElementById('select-anio').value;
@@ -335,6 +389,12 @@
         
         const esTodo = respExistente ? (respExistente.es_todo ? 'SI' : 'NO') : 'NO';
         const valTodoText = respExistente ? (respExistente.detalle_todo || '') : '';
+        
+        // Cargar los checks de visitas guardados
+        const valTodoVisita = respExistente ? (respExistente.todo_visita || '') : '';
+        const chkPreliminar = valTodoVisita.includes('Visita Preliminar') ? 'checked' : '';
+        const chkFinal = valTodoVisita.includes('Visita Final') ? 'checked' : '';
+
         const valTodoAsignadoEmail = respExistente ? (respExistente.todo_asignado_email || '') : '';
         const valTodoComentarioEjecutor = respExistente ? (respExistente.todo_comentario_ejecutor || '') : '';
         const valTodoRevisado = respExistente ? (respExistente.todo_revisado ? true : false) : false;
@@ -403,6 +463,21 @@
                   <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Detalle To/Do</label>
                     <textarea id="todo-text-${idPregunta}" rows="2" placeholder="Detalle de lo que está pendiente..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white leading-tight">${valTodoText}</textarea>
+                  </div>
+
+                  <!-- NUEVO CAMPO SOLICITADO: A REALIZAR TO/DO (VISITAS) -->
+                  <div class="bg-white p-2 rounded border border-slate-200">
+                    <label class="block text-[11px] font-bold text-indigo-700 mb-1">A Realizar To/Do</label>
+                    <div class="flex items-center gap-4 text-xs font-medium text-slate-700">
+                      <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="todo-visita-preliminar-${idPregunta}" ${chkPreliminar} class="rounded text-indigo-600 focus:ring-indigo-500">
+                        <span>Visita Preliminar</span>
+                      </label>
+                      <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="todo-visita-final-${idPregunta}" ${chkFinal} class="rounded text-indigo-600 focus:ring-indigo-500">
+                        <span>Visita Final</span>
+                      </label>
+                    </div>
                   </div>
 
                   <div>
@@ -476,6 +551,82 @@
           </div>
         `;
       });
+    }
+
+    async function guardarPreguntaCompleta(idPregunta, tieneOpciones) {
+      const clienteIdVal = document.getElementById('select-cliente').value;
+      const anioVal = document.getElementById('select-anio').value;
+
+      if (!clienteIdVal) {
+        alert("Selecciona un cliente.");
+        return;
+      }
+
+      let resultadoVal = '';
+      if (tieneOpciones) {
+        const selObj = document.getElementById(`sel-${idPregunta}`);
+        if (selObj) resultadoVal = selObj.value;
+      }
+
+      const qlVal = document.getElementById(`ql-val-${idPregunta}`).value;
+      if (qlVal === 'SI') {
+        resultadoVal = 'QUICK_LETTER';
+      }
+
+      const respVal = document.getElementById(`resp-${idPregunta}`).value;
+      const obsQL = document.getElementById(`ql-obs-${idPregunta}`).value;
+
+      const esTodoVal = document.getElementById(`todo-val-${idPregunta}`).value === 'SI';
+      const detailTodoVal = document.getElementById(`todo-text-${idPregunta}`).value;
+      
+      // Armar la cadena de Visita Preliminar y/o Final
+      const preliminarChecked = document.getElementById(`todo-visita-preliminar-${idPregunta}`).checked;
+      const finalChecked = document.getElementById(`todo-visita-final-${idPregunta}`).checked;
+      let visitasArr = [];
+      if (preliminarChecked) visitasArr.push('Visita Preliminar');
+      if (finalChecked) visitasArr.push('Visita Final');
+      const todoVisitaVal = visitasArr.join(', ');
+
+      const emailTodoVal = document.getElementById(`todo-email-${idPregunta}`).value;
+      const comEjecutorVal = document.getElementById(`todo-comentario-ejecutor-${idPregunta}`).value;
+      const revTodoVal = document.getElementById(`todo-revisado-${idPregunta}`).checked;
+      const revEmailVal = document.getElementById(`todo-reviso-email-${idPregunta}`).value;
+
+      const esOpinionVal = document.getElementById(`op-val-${idPregunta}`).value === 'SI';
+      const detailOpinionVal = document.getElementById(`op-text-${idPregunta}`).value;
+
+      const decSocioVal = document.getElementById(`socio-sel-${idPregunta}`).value;
+      const comSocioVal = document.getElementById(`socio-comment-${idPregunta}`).value;
+
+      const payload = {
+        cliente_id: clienteIdVal,
+        pregunta_id: idPregunta,
+        anio: Number(anioVal),
+        resultado: resultadoVal,
+        respuesta: respVal,
+        observaciones_ql: obsQL,
+        es_todo: esTodoVal,
+        detalle_todo: detailTodoVal,
+        todo_visita: todoVisitaVal, // GUARDA VISITA PRELIMINAR / FINAL
+        todo_asignado_email: emailTodoVal,
+        todo_comentario_ejecutor: comEjecutorVal,
+        todo_revisado: revTodoVal,
+        todo_reviso_email: revEmailVal,
+        es_opinion: esOpinionVal,
+        detalle_opinion: detailOpinionVal,
+        decision_socio: decSocioVal,
+        comentario_decision: comSocioVal
+      };
+
+      const { data, error } = await supabaseClient
+        .from('respuestas_auditoria')
+        .upsert(payload, { onConflict: 'cliente_id, pregunta_id, anio' });
+
+      if (error) {
+        alert("Error al guardar: " + error.message);
+      } else {
+        alert("¡Guardado correctamente!");
+      }
     }
 
     async function cargarHistoricoComparativo() {
@@ -572,22 +723,26 @@
               todoTexto = `
                 <div class="text-[10px] text-slate-700 bg-slate-100 p-1.5 rounded border border-slate-200 mt-1 space-y-0.5">
                   <div><strong>To/Do:</strong> ${resp.detalle_todo || 'Sin detalle'}</div>
+                  ${resp.todo_visita ? `<div class="text-indigo-800 font-semibold"><strong>En:</strong> ${resp.todo_visita}</div>` : ''}
                   ${resp.todo_asignado_email ? `<div><strong>Asignado:</strong> ${resp.todo_asignado_email}</div>` : ''}
                   ${resp.todo_comentario_ejecutor ? `<div><strong>Ejecutor:</strong> ${resp.todo_comentario_ejecutor}</div>` : ''}
-                  ${resp.todo_revisado ? `<div class="text-emerald-700 font-bold">✓ Revisado por: ${resp.todo_reviso_email || 'S/E'}</div>` : ''}
+                  ${resp.todo_revisado ? `<div class="text-emerald-700 font-bold">✓ Revisado por: ${resp.todo_reviso_email || 'N/A'}</div>` : ''}
                 </div>
               `;
             }
 
-            const opTexto = resp.detalle_opinion ? `<div class="text-[10px] text-rose-800 bg-rose-50 p-1 rounded border border-rose-200 mt-1"><strong>Opinión:</strong> ${resp.detalle_opinion}</div>` : '';
+            let opinionTexto = '';
+            if (resp.es_opinion) {
+              opinionTexto = `<div class="text-[10px] text-rose-800 bg-rose-50 p-1 rounded border border-rose-200 mt-1"><strong>Opinión:</strong> ${resp.detalle_opinion || 'Sin detalle'}</div>`;
+            }
 
             celdasAnios += `
-              <td class="p-3 border-r border-slate-200 align-top text-xs space-y-1">
+              <td class="p-3 border-r border-slate-200 align-top text-left text-xs space-y-1">
                 <div class="flex flex-wrap gap-1 mb-1">${badges.join(' ')}</div>
-                ${respTexto ? `<div class="text-[11px] text-slate-700 leading-snug whitespace-pre-line"><strong>Respuesta:</strong> ${respTexto}</div>` : ''}
+                <div class="text-slate-800 leading-snug whitespace-pre-line">${respTexto}</div>
                 ${obsQLTexto}
                 ${todoTexto}
-                ${opTexto}
+                ${opinionTexto}
                 ${badgeSocio}
               </td>
             `;
@@ -595,12 +750,10 @@
         });
 
         tbody.innerHTML += `
-          <tr class="hover:bg-slate-50 transition">
-            <td class="p-3 font-semibold text-slate-800 border-r border-slate-200 align-top leading-relaxed">
-              <span class="inline-block bg-black text-white font-bold text-[10px] border border-black px-2 py-0.5 rounded mb-1">
-                Pregunta #${idx + 1}
-              </span>
-              <div class="mt-1">${textoPregunta}</div>
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="p-3 border-r border-slate-200 align-top">
+              <span class="text-[10px] font-bold bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded mr-1">#${idx + 1}</span>
+              <span class="font-semibold text-slate-800">${textoPregunta}</span>
             </td>
             ${celdasAnios}
           </tr>
@@ -614,46 +767,44 @@
       const contador = document.getElementById('contador-ql');
 
       if (!clienteIdVal) {
-        contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">Por favor selecciona un cliente arriba.</p>';
+        contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">Selecciona un cliente arriba para ver el acumulado de Quick Lett.</p>';
         contador.textContent = '0 Hallazgos';
         return;
       }
 
-      contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-6">Cargando acumulado de Quick Lett...</p>';
+      contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-6">Cargando hallazgos Quick Lett...</p>';
 
-      const { data: qlData, error } = await supabaseClient
+      const { data: respuestas, error } = await supabaseClient
         .from('respuestas_auditoria')
         .select('*')
         .eq('cliente_id', clienteIdVal)
         .eq('resultado', 'QUICK_LETTER');
 
-      if (error || !qlData || qlData.length === 0) {
-        contenedor.innerHTML = '<div class="col-span-full p-6 text-center text-slate-500 bg-slate-50 rounded-xl border border-slate-200 text-xs">No se encontraron hallazgos registrados en Quick Lett para este cliente.</div>';
+      if (error || !respuestas || respuestas.length === 0) {
+        contenedor.innerHTML = '<div class="col-span-full p-4 bg-orange-50 text-orange-800 text-xs rounded-xl border border-orange-200 text-center font-medium">No existen hallazgos de Quick Lett registrados para este cliente.</div>';
         contador.textContent = '0 Hallazgos';
         return;
       }
 
-      const { data: preguntasBanco } = await supabaseClient.from('preguntas_banco').select('*');
-
-      contador.textContent = `${qlData.length} Hallazgos Acumulados`;
+      contador.textContent = `${respuestas.length} Hallazgos`;
       contenedor.innerHTML = '';
 
-      qlData.forEach((item) => {
-        const pregObj = preguntasBanco ? preguntasBanco.find(p => String(p.id_pregunta || p.id) === String(item.pregunta_id)) : null;
-        const textoPregunta = pregObj ? (pregObj.texto_pregunta || `Pregunta #${item.pregunta_id}`) : `Pregunta #${item.pregunta_id}`;
+      const { data: preguntas } = await supabaseClient.from('preguntas_banco').select('*');
+
+      respuestas.forEach((r, idx) => {
+        const pregObj = preguntas ? preguntas.find(p => String(p.id_pregunta || p.id) === String(r.pregunta_id)) : null;
+        const textoPreg = pregObj ? (pregObj.texto_pregunta || `Pregunta #${r.pregunta_id}`) : `Pregunta #${r.pregunta_id}`;
 
         contenedor.innerHTML += `
           <div class="p-4 bg-orange-50/40 border border-orange-200 rounded-xl space-y-2 shadow-xs">
             <div class="flex justify-between items-center">
-              <span class="text-[10px] font-bold text-white bg-black border border-black px-2 py-0.5 rounded-md">
-                Año ${item.anio}
-              </span>
-              <span class="text-[10px] font-semibold text-slate-400">ID Pregunta: #${item.pregunta_id}</span>
+              <span class="text-[10px] font-bold bg-orange-500 text-white px-2 py-0.5 rounded">Caso #${idx + 1}</span>
+              <span class="text-xs font-bold text-orange-800">Año ${r.anio}</span>
             </div>
-            <p class="text-xs font-bold text-slate-800">${textoPregunta}</p>
-            <div class="pt-2 border-t border-orange-200/60">
-              <span class="block text-[10px] font-bold text-orange-700 uppercase">Detalle / Hallazgo Quick Lett:</span>
-              <p class="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed">${item.observaciones_ql || item.respuesta || 'Sin detalle ingresado.'}</p>
+            <p class="text-xs font-semibold text-slate-800">${textoPreg}</p>
+            <div class="p-2.5 bg-white rounded-lg border border-orange-200 text-xs text-slate-700">
+              <strong class="text-orange-900 block mb-1">Detalle del Hallazgo:</strong>
+              ${r.observaciones_ql || r.respuesta || r.observaciones || 'Sin detalle escrito'}
             </div>
           </div>
         `;
@@ -664,207 +815,84 @@
       const clienteIdVal = document.getElementById('select-cliente').value;
       const contenedor = document.getElementById('contenedor-resumen-opinion');
       const contador = document.getElementById('contador-opinion');
-      const badgeEstado = document.getElementById('estado-global-opinion');
+      const estadoGlobal = document.getElementById('estado-global-opinion');
 
       if (!clienteIdVal) {
-        contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">Por favor selecciona un cliente arriba.</p>';
+        contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">Selecciona un cliente arriba para ver el acumulado de Puntos para Opinión.</p>';
         contador.textContent = '0 Casos';
-        badgeEstado.textContent = 'Sin Estado';
-        badgeEstado.className = 'text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-md';
+        estadoGlobal.textContent = 'Sin Estado';
+        estadoGlobal.className = 'text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-md';
         return;
       }
 
-      contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-6">Cargando acumulado de Puntos para Opinión...</p>';
+      contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-6">Cargando puntos de opinión...</p>';
 
-      const { data: opData, error } = await supabaseClient
+      const { data: respuestas, error } = await supabaseClient
         .from('respuestas_auditoria')
         .select('*')
         .eq('cliente_id', clienteIdVal)
         .eq('es_opinion', true);
 
-      if (error || !opData || opData.length === 0) {
-        contenedor.innerHTML = '<div class="col-span-full p-6 text-center text-slate-500 bg-slate-50 rounded-xl border border-slate-200 text-xs">No hay puntos marcados para Opinión en este cliente.</div>';
+      if (error || !respuestas || respuestas.length === 0) {
+        contenedor.innerHTML = '<div class="col-span-full p-4 bg-rose-50 text-rose-800 text-xs rounded-xl border border-rose-200 text-center font-medium">No existen puntos marcados para Opinión en este cliente.</div>';
         contador.textContent = '0 Casos';
-        badgeEstado.textContent = 'Estado: Satisfactorio (Sin Observaciones)';
-        badgeEstado.className = 'text-xs font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 rounded-md';
+        estadoGlobal.textContent = 'Limpio / Sin Salvedades';
+        estadoGlobal.className = 'text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-md';
         return;
       }
 
-      const vanAOpinion = opData.filter(i => i.decision_socio === 'VA_OPINION').length;
-      
-      if (vanAOpinion > 0) {
-        badgeEstado.textContent = `Estado: Con Observaciones (${vanAOpinion} van a Opinión)`;
-        badgeEstado.className = 'text-xs font-bold text-rose-800 bg-rose-100 border border-rose-300 px-2.5 py-0.5 rounded-md';
+      contador.textContent = `${respuestas.length} Casos`;
+
+      const tienenAprobados = respuestas.some(r => r.decision_socio === 'VA_OPINION');
+      const tienenPendientes = respuestas.some(r => r.decision_socio === 'PENDIENTE' || !r.decision_socio);
+
+      if (tienenAprobados) {
+        estadoGlobal.textContent = 'Opinión Modificada / Con Salvedades';
+        estadoGlobal.className = 'text-xs font-bold text-rose-800 bg-rose-100 border border-rose-300 px-2.5 py-0.5 rounded-md';
+      } else if (tienenPendientes) {
+        estadoGlobal.textContent = 'Revisión Pendiente por Socio';
+        estadoGlobal.className = 'text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-md';
       } else {
-        badgeEstado.textContent = 'Estado: En Revisión / Pendiente';
-        badgeEstado.className = 'text-xs font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2.5 py-0.5 rounded-md';
+        estadoGlobal.textContent = 'Puntos Desestimados / Limpio';
+        estadoGlobal.className = 'text-xs font-bold text-slate-700 bg-slate-100 border border-slate-300 px-2.5 py-0.5 rounded-md';
       }
 
-      const { data: preguntasBanco } = await supabaseClient.from('preguntas_banco').select('*');
-
-      contador.textContent = `${opData.length} Casos Acumulados`;
       contenedor.innerHTML = '';
 
-      opData.forEach((item) => {
-        const pregObj = preguntasBanco ? preguntasBanco.find(p => String(p.id_pregunta || p.id) === String(item.pregunta_id)) : null;
-        const textoPregunta = pregObj ? (pregObj.texto_pregunta || `Pregunta #${item.pregunta_id}`) : `Pregunta #${item.pregunta_id}`;
+      const { data: preguntas } = await supabaseClient.from('preguntas_banco').select('*');
 
-        let badgeDecision = '';
-        if (item.decision_socio === 'VA_OPINION') {
-          badgeDecision = '<span class="text-[10px] font-bold text-rose-800 bg-rose-100 border border-rose-300 px-2 py-0.5 rounded-md">SI VA a Opinión</span>';
-        } else if (item.decision_socio === 'NO_VA') {
-          badgeDecision = '<span class="text-[10px] font-bold text-slate-700 bg-slate-200 border border-slate-300 px-2 py-0.5 rounded-md">NO VA</span>';
+      respuestas.forEach((r, idx) => {
+        const pregObj = preguntas ? preguntas.find(p => String(p.id_pregunta || p.id) === String(r.pregunta_id)) : null;
+        const textoPreg = pregObj ? (pregObj.texto_pregunta || `Pregunta #${r.pregunta_id}`) : `Pregunta #${r.pregunta_id}`;
+
+        let estadoBadge = '';
+        if (r.decision_socio === 'VA_OPINION') {
+          estadoBadge = '<span class="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300">SI VA A OPINIÓN</span>';
+        } else if (r.decision_socio === 'NO_VA') {
+          estadoBadge = '<span class="text-[10px] font-bold text-slate-600 bg-slate-200 px-2 py-0.5 rounded border border-slate-300">DESESTIMADO</span>';
         } else {
-          badgeDecision = '<span class="text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-md">Pendiente de Revisión</span>';
+          estadoBadge = '<span class="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">PENDIENTE SOCIO</span>';
         }
 
-        const comentarioSocio = item.comentario_decision ? `<div class="mt-2 text-xs bg-white p-2 rounded border border-rose-200 text-slate-700"><strong>Comentario Decisión:</strong> ${item.comentario_decision}</div>` : '';
-
         contenedor.innerHTML += `
-          <div class="p-4 bg-rose-50/40 border border-rose-200 rounded-xl space-y-2 shadow-xs">
+          <div class="p-4 bg-rose-50/30 border border-rose-200 rounded-xl space-y-2 shadow-xs">
             <div class="flex justify-between items-center">
-              <span class="text-[10px] font-bold text-white bg-black border border-black px-2 py-0.5 rounded-md">
-                Año ${item.anio}
-              </span>
-              ${badgeDecision}
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold bg-rose-600 text-white px-2 py-0.5 rounded">Caso #${idx + 1}</span>
+                <span class="text-xs font-bold text-slate-700">Año ${r.anio}</span>
+              </div>
+              ${estadoBadge}
             </div>
-            <p class="text-xs font-bold text-slate-800">${textoPregunta}</p>
-            <div class="pt-2 border-t border-rose-200/60">
-              <span class="block text-[10px] font-bold text-rose-700 uppercase">Argumento de Opinión:</span>
-              <p class="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed">${item.detalle_opinion || 'Sin argumento ingresado.'}</p>
-              ${comentarioSocio}
+            <p class="text-xs font-semibold text-slate-800">${textoPreg}</p>
+            <div class="p-2.5 bg-white rounded-lg border border-rose-200 text-xs text-slate-700 space-y-1">
+              <strong class="text-rose-900 block">Argumento de Opinión:</strong>
+              <div>${r.detalle_opinion || r.respuesta || 'Sin argumento registrado'}</div>
+              ${r.comentario_decision ? `<div class="pt-2 mt-2 border-t border-slate-100 text-[11px] text-slate-600 italic"><strong>Comentario Socio:</strong> ${r.comentario_decision}</div>` : ''}
             </div>
           </div>
         `;
       });
     }
-
-    function marcarQuickLetter(preguntaId) {
-      const btn = document.getElementById(`btn-ql-${preguntaId}`);
-      const valInput = document.getElementById(`ql-val-${preguntaId}`);
-
-      if (valInput.value === 'NO') {
-        valInput.value = 'SI';
-        btn.className = 'w-full py-2 text-xs font-bold rounded-lg transition shadow-sm flex items-center justify-center bg-orange-500 text-white border border-orange-600';
-        btn.innerHTML = 'ACTIVADO EN QUICK LETT';
-      } else {
-        valInput.value = 'NO';
-        btn.className = 'w-full py-2 text-xs font-bold rounded-lg transition shadow-sm flex items-center justify-center bg-orange-100 text-orange-800 border border-orange-300 hover:bg-orange-500 hover:text-white';
-        btn.innerHTML = 'Quick Lett';
-      }
-    }
-
-    function toggleTodo(preguntaId) {
-      const btn = document.getElementById(`btn-todo-${preguntaId}`);
-      const valInput = document.getElementById(`todo-val-${preguntaId}`);
-      const panelFields = document.getElementById(`panel-todo-fields-${preguntaId}`);
-
-      if (valInput.value === 'NO') {
-        valInput.value = 'SI';
-        btn.className = 'w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center bg-slate-700 text-white border border-slate-800';
-        btn.innerHTML = 'Registrado en To/Do';
-        panelFields.classList.remove('hidden');
-        panelFields.classList.add('block');
-      } else {
-        valInput.value = 'NO';
-        btn.className = 'w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center bg-slate-200 text-slate-800 border border-slate-300 hover:bg-slate-700 hover:text-white';
-        btn.innerHTML = 'To/Do';
-        panelFields.classList.remove('block');
-        panelFields.classList.add('hidden');
-      }
-    }
-
-    function toggleOpinion(preguntaId) {
-      const btn = document.getElementById(`btn-op-${preguntaId}`);
-      const valInput = document.getElementById(`op-val-${preguntaId}`);
-
-      if (valInput.value === 'NO') {
-        valInput.value = 'SI';
-        btn.className = 'w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center bg-rose-600 text-white border border-rose-700';
-        btn.innerHTML = 'ACTIVADO EN OPINIÓN';
-      } else {
-        valInput.value = 'NO';
-        btn.className = 'w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-600 hover:text-white';
-        btn.innerHTML = 'Opinión';
-      }
-    }
-
-    async function guardarPreguntaCompleta(preguntaId, tieneOpciones) {
-      const clienteId = document.getElementById('select-cliente').value;
-      const anioSeleccionado = Number(document.getElementById('select-anio').value);
-      const respuestaText = document.getElementById(`resp-${preguntaId}`).value;
-      const esQuickLetter = document.getElementById(`ql-val-${preguntaId}`).value;
-      const observacionQLText = document.getElementById(`ql-obs-${preguntaId}`).value;
-      
-      const esTodoVal = document.getElementById(`todo-val-${preguntaId}`).value === 'SI';
-      const detalleTodoText = document.getElementById(`todo-text-${preguntaId}`).value;
-      const todoAsignadoEmailVal = document.getElementById(`todo-email-${preguntaId}`).value;
-      const todoComentarioEjecutorVal = document.getElementById(`todo-comentario-ejecutor-${preguntaId}`).value;
-      const todoRevisadoVal = document.getElementById(`todo-revisado-${preguntaId}`).checked;
-      const todoRevisoEmailVal = document.getElementById(`todo-reviso-email-${preguntaId}`).value;
-
-      const esOpinionVal = document.getElementById(`op-val-${preguntaId}`).value === 'SI';
-      const detalleOpinionText = document.getElementById(`op-text-${preguntaId}`).value;
-
-      const decisionSocioVal = document.getElementById(`socio-sel-${preguntaId}`).value;
-      const comentarioDecisionVal = document.getElementById(`socio-comment-${preguntaId}`).value;
-
-      let opcionSeleccionada = null;
-      if (tieneOpciones) {
-        opcionSeleccionada = document.getElementById(`sel-${preguntaId}`).value;
-      }
-
-      if (!clienteId) {
-        alert('Por favor selecciona un Cliente en la parte superior.');
-        return;
-      }
-
-      let resultadoFinal = 'REDACCION';
-      if (esQuickLetter === 'SI') {
-        resultadoFinal = 'QUICK_LETTER';
-      } else if (opcionSeleccionada) {
-        resultadoFinal = opcionSeleccionada;
-      }
-
-      await supabaseClient
-        .from('respuestas_auditoria')
-        .delete()
-        .eq('cliente_id', clienteId)
-        .eq('pregunta_id', preguntaId)
-        .eq('anio', anioSeleccionado);
-
-      const { error } = await supabaseClient
-        .from('respuestas_auditoria')
-        .insert([
-          { 
-            cliente_id: clienteId, 
-            pregunta_id: preguntaId, 
-            resultado: resultadoFinal, 
-            respuesta: respuestaText,
-            observaciones: respuestaText,
-            observaciones_ql: observacionQLText,
-            anio: anioSeleccionado,
-            es_todo: esTodoVal,
-            detalle_todo: detalleTodoText,
-            todo_asignado_email: todoAsignadoEmailVal,
-            todo_comentario_ejecutor: todoComentarioEjecutorVal,
-            todo_revisado: todoRevisadoVal,
-            todo_reviso_email: todoRevisoEmailVal,
-            es_opinion: esOpinionVal,
-            detalle_opinion: detalleOpinionText,
-            decision_socio: decisionSocioVal,
-            comentario_decision: comentarioDecisionVal
-          }
-        ]);
-
-      if (error) {
-        alert('Error al guardar evaluación: ' + error.message);
-      } else {
-        alert(`Evaluación completa guardada con éxito para el Año ${anioSeleccionado}.`);
-      }
-    }
-
-    iniciar();
   </script>
 </body>
 </html>
