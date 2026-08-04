@@ -80,7 +80,7 @@
           <span id="contador-preguntas" class="text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-md">0 Preguntas</span>
         </div>
 
-        <div id="contenedor-preguntas" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div id="contenedor-preguntas" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">
             Selecciona un cliente, año y un aspecto arriba para cargar el cuestionario.
           </p>
@@ -235,7 +235,6 @@
 
     async function cargarClientes() {
       const select = document.getElementById('select-cliente');
-      // Usamos select('*') para tolerar cualquier nombre de columna ID en la tabla clientes
       const { data: clientes, error } = await supabaseClient.from('clientes').select('*');
 
       if (error) {
@@ -286,13 +285,13 @@
       if (hiddenVal.value === 'SI') {
         hiddenVal.value = 'NO';
         btn.textContent = 'To/Do';
-        btn.className = 'w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center bg-slate-200 text-slate-800 border border-slate-300 hover:bg-slate-700 hover:text-white';
+        btn.className = 'w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center bg-slate-200 text-slate-800 border border-slate-300 hover:bg-slate-700 hover:text-white';
         panelFields.classList.add('hidden');
         panelFields.classList.remove('block');
       } else {
         hiddenVal.value = 'SI';
-        btn.textContent = 'Registrado en To/Do';
-        btn.className = 'w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center bg-slate-700 text-white border border-slate-800';
+        btn.textContent = '✓ To/Do';
+        btn.className = 'w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center bg-slate-700 text-white border border-slate-800';
         panelFields.classList.remove('hidden');
         panelFields.classList.add('block');
       }
@@ -301,30 +300,36 @@
     function marcarQuickLetter(preguntaId) {
       const btn = document.getElementById(`btn-ql-${preguntaId}`);
       const hiddenVal = document.getElementById(`ql-val-${preguntaId}`);
+      const obsArea = document.getElementById(`ql-obs-${preguntaId}`);
 
       if (hiddenVal.value === 'SI') {
         hiddenVal.value = 'NO';
         btn.textContent = 'Quick Lett';
-        btn.className = 'w-full py-2 text-xs font-bold rounded-lg transition shadow-sm flex items-center justify-center bg-orange-100 text-orange-800 border border-orange-300 hover:bg-orange-500 hover:text-white';
+        btn.className = 'w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center bg-orange-100 text-orange-800 border border-orange-300 hover:bg-orange-500 hover:text-white';
+        obsArea.classList.add('hidden');
       } else {
         hiddenVal.value = 'SI';
-        btn.textContent = 'ACTIVADO EN QUICK LETT';
-        btn.className = 'w-full py-2 text-xs font-bold rounded-lg transition shadow-sm flex items-center justify-center bg-orange-500 text-white border border-orange-600';
+        btn.textContent = '✓ Quick Lett';
+        btn.className = 'w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center bg-orange-500 text-white border border-orange-600';
+        obsArea.classList.remove('hidden');
       }
     }
 
     function toggleOpinion(preguntaId) {
       const btn = document.getElementById(`btn-op-${preguntaId}`);
       const hiddenVal = document.getElementById(`op-val-${preguntaId}`);
+      const textArea = document.getElementById(`op-text-${preguntaId}`);
 
       if (hiddenVal.value === 'SI') {
         hiddenVal.value = 'NO';
         btn.textContent = 'Opinión';
-        btn.className = 'w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-600 hover:text-white';
+        btn.className = 'w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-600 hover:text-white';
+        textArea.classList.add('hidden');
       } else {
         hiddenVal.value = 'SI';
-        btn.textContent = 'ACTIVADO EN OPINIÓN';
-        btn.className = 'w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center bg-rose-600 text-white border border-rose-700';
+        btn.textContent = '✓ Opinión';
+        btn.className = 'w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center bg-rose-600 text-white border border-rose-700';
+        textArea.classList.remove('hidden');
       }
     }
 
@@ -375,10 +380,12 @@
 
         const respExistente = respuestasGuardadas ? respuestasGuardadas.find(r => String(r.pregunta_id) === String(preguntaId)) : null;
 
-        const valResultado = respExistente ? respExistente.resultado : '';
+        const valResultado = respExistente ? (respExistente.resultado || '') : '';
+        const resultadosSeleccionados = valResultado ? valResultado.split(',').map(s => s.trim()) : [];
+
         const valRespuestaText = respExistente ? (respExistente.respuesta || respExistente.observaciones || '') : '';
         const valObservacionQL = respExistente ? (respExistente.observaciones_ql || '') : '';
-        const esQL = valResultado === 'QUICK_LETTER' ? 'SI' : 'NO';
+        const esQL = valResultado.includes('QUICK_LETTER') ? 'SI' : 'NO';
         
         const esTodo = respExistente ? (respExistente.es_todo ? 'SI' : 'NO') : 'NO';
         const valTodoText = respExistente ? (respExistente.detalle_todo || '') : '';
@@ -400,66 +407,116 @@
 
         let htmlSeleccion = '';
         if (tieneOpciones) {
-          let opcionesOptions = '<option value="">-- Selecciona una Opción --</option>';
-          opcionesPregunta.forEach(op => {
+          let opcionesCheckboxes = '';
+          opcionesPregunta.forEach((op, opIdx) => {
             const textoOp = op.texto_opcion || op.opcion || `Opción #${op.id_opcion || op.opcion_id}`;
-            const selected = (valResultado === textoOp) ? 'selected' : '';
-            opcionesOptions += `<option value="${textoOp}" ${selected}>${textoOp}</option>`;
+            const isChecked = resultadosSeleccionados.includes(textoOp) ? 'checked' : '';
+            opcionesCheckboxes += `
+              <label class="flex items-start gap-2 p-1.5 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition">
+                <input type="checkbox" name="opciones-${preguntaId}" value="${textoOp}" ${isChecked} class="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500">
+                <span class="text-xs text-slate-700 leading-snug">${textoOp}</span>
+              </label>
+            `;
           });
 
           htmlSeleccion = `
-            <div class="mb-3">
-              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Opción Seleccionada</label>
-              <select id="sel-${preguntaId}" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500">
-                ${opcionesOptions}
-              </select>
+            <div class="mb-2">
+              <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Opciones Seleccionables (Puedes marcar varias)</label>
+              <div class="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto p-1 bg-white border border-slate-200 rounded-lg">
+                ${opcionesCheckboxes}
+              </div>
             </div>
           `;
         }
 
         contenedor.innerHTML += `
-          <div class="p-4 bg-white border border-slate-200 rounded-xl space-y-3 shadow-sm hover:border-indigo-300 transition flex flex-col justify-between">
-            <div>
-              <div class="flex justify-between items-center mb-2">
-                <span class="text-[10px] font-bold bg-black text-white border border-black px-2 py-0.5 rounded-md">
+          <div class="p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-indigo-300 transition flex flex-col justify-between">
+            
+            <!-- Encabezado de Pregunta -->
+            <div class="mb-3 border-b border-slate-100 pb-2">
+              <div class="flex justify-between items-center mb-1.5">
+                <span class="text-[10px] font-bold bg-slate-900 text-white px-2 py-0.5 rounded-md">
                   Pregunta #${idx + 1}
                 </span>
-                <span class="text-[10px] font-bold bg-black text-white border border-black px-2 py-0.5 rounded-md">Año ${anioVal}</span>
+                <span class="text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-md">Año ${anioVal}</span>
               </div>
               <p class="text-xs sm:text-sm font-semibold text-slate-800 leading-snug">${textoPregunta}</p>
             </div>
-            
-            <div class="pt-3 border-t border-slate-100 space-y-3">
+
+            <!-- Estructura: Botones compactos a la izquierda (1. To/Do, 2. Quick Lett, 3. Opinión) -->
+            <div class="grid grid-cols-12 gap-3 items-start">
               
-              ${htmlSeleccion}
-
-              <!-- 1. RESPUESTA -->
-              <div>
-                <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Respuesta (${anioVal})</label>
-                <textarea id="resp-${preguntaId}" rows="4" placeholder="Escribe la respuesta correspondiente al año ${anioVal}..." class="w-full p-2.5 border border-slate-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50 focus:bg-white leading-relaxed">${valRespuestaText}</textarea>
-              </div>
-
-              <!-- 2. TO/DO -->
-              <div class="p-2.5 bg-slate-100 rounded-lg border border-slate-300 space-y-2">
+              <!-- COLUMNA IZQUIERDA: Orden fijo de botones -->
+              <div class="col-span-12 sm:col-span-3 lg:col-span-2 flex flex-col gap-1.5 min-w-[85px]">
+                
+                <!-- 1. Botón To/Do -->
                 <button onclick="toggleTodo('${preguntaId}')" id="btn-todo-${preguntaId}" 
-                        class="w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center ${
+                        class="w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center whitespace-nowrap ${
                           esTodo === 'SI' 
                           ? 'bg-slate-700 text-white border border-slate-800' 
                           : 'bg-slate-200 text-slate-800 border border-slate-300 hover:bg-slate-700 hover:text-white'
                         }">
-                  ${esTodo === 'SI' ? 'Registrado en To/Do' : 'To/Do'}
+                  ${esTodo === 'SI' ? '✓ To/Do' : 'To/Do'}
                 </button>
                 <input type="hidden" id="todo-val-${preguntaId}" value="${esTodo}">
 
-                <div id="panel-todo-fields-${preguntaId}" class="${esTodo === 'SI' ? 'block' : 'hidden'} space-y-2 pt-2 border-t border-slate-300">
+                <!-- 2. Botón Quick Lett -->
+                <button onclick="marcarQuickLetter('${preguntaId}')" id="btn-ql-${preguntaId}" 
+                        class="w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center whitespace-nowrap ${
+                          esQL === 'SI' 
+                          ? 'bg-orange-500 text-white border border-orange-600' 
+                          : 'bg-orange-100 text-orange-800 border border-orange-300 hover:bg-orange-500 hover:text-white'
+                        }">
+                  ${esQL === 'SI' ? '✓ Quick Lett' : 'Quick Lett'}
+                </button>
+                <input type="hidden" id="ql-val-${preguntaId}" value="${esQL}">
+
+                <!-- 3. Botón Opinión -->
+                <button onclick="toggleOpinion('${preguntaId}')" id="btn-op-${preguntaId}" 
+                        class="w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center whitespace-nowrap ${
+                          esOpinion === 'SI' 
+                          ? 'bg-rose-600 text-white border border-rose-700' 
+                          : 'bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-600 hover:text-white'
+                        }">
+                  ${esOpinion === 'SI' ? '✓ Opinión' : 'Opinión'}
+                </button>
+                <input type="hidden" id="op-val-${preguntaId}" value="${esOpinion}">
+
+              </div>
+
+              <!-- COLUMNA DERECHA: Respuestas y Campos Amplios -->
+              <div class="col-span-12 sm:col-span-9 lg:col-span-10 space-y-3 w-full">
+                
+                ${htmlSeleccion}
+
+                <!-- Textarea de Respuesta Principal -->
+                <div class="w-full">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Respuesta Detallada (${anioVal})</label>
+                  <textarea id="resp-${preguntaId}" rows="3" placeholder="Escribe la respuesta detallada..." class="w-full p-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50 focus:bg-white leading-relaxed whitespace-pre-wrap break-words">${valRespuestaText}</textarea>
+                </div>
+
+                <!-- Detalle Quick Lett -->
+                <div id="ql-obs-${preguntaId}" class="${esQL === 'SI' ? 'block' : 'hidden'} p-2 bg-orange-50 rounded-lg border border-orange-200 w-full">
+                  <label class="block text-[10px] font-bold text-orange-900 uppercase mb-1">Detalle del Hallazgo (Quick Lett)</label>
+                  <textarea id="ql-obs-text-${preguntaId}" rows="2" placeholder="Escribe el detalle del hallazgo para Quick Lett..." class="w-full p-2 border border-orange-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-orange-500 bg-white leading-tight whitespace-pre-wrap break-words">${valObservacionQL}</textarea>
+                </div>
+
+                <!-- Detalle Opinión -->
+                <div id="op-text-${preguntaId}" class="${esOpinion === 'SI' ? 'block' : 'hidden'} p-2 bg-rose-50 rounded-lg border border-rose-200 w-full">
+                  <label class="block text-[10px] font-bold text-rose-900 uppercase mb-1">Argumento para Opinión</label>
+                  <textarea id="op-text-input-${preguntaId}" rows="2" placeholder="Escribe el argumento para la opinión..." class="w-full p-2 border border-rose-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-rose-500 bg-white leading-tight whitespace-pre-wrap break-words">${valOpinionText}</textarea>
+                </div>
+
+                <!-- Panel Campos TO/DO -->
+                <div id="panel-todo-fields-${preguntaId}" class="${esTodo === 'SI' ? 'block' : 'hidden'} p-2.5 bg-slate-100 rounded-lg border border-slate-300 space-y-2 w-full">
                   <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Detalle To/Do</label>
-                    <textarea id="todo-text-${preguntaId}" rows="2" placeholder="Detalle de lo que está pendiente..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white leading-tight">${valTodoText}</textarea>
+                    <textarea id="todo-text-${preguntaId}" rows="2" placeholder="Detalle de lo que está pendiente..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white leading-tight whitespace-pre-wrap break-words">${valTodoText}</textarea>
                   </div>
 
                   <div class="bg-white p-2 rounded border border-slate-200">
                     <label class="block text-[11px] font-bold text-indigo-700 mb-1">A Realizar To/Do</label>
-                    <div class="flex items-center gap-4 text-xs font-medium text-slate-700">
+                    <div class="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-700">
                       <label class="flex items-center gap-1.5 cursor-pointer">
                         <input type="checkbox" id="todo-visita-preliminar-${preguntaId}" ${chkPreliminar} class="rounded text-indigo-600 focus:ring-indigo-500">
                         <span>Visita Preliminar</span>
@@ -478,7 +535,7 @@
 
                   <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Comentario Ejecutor</label>
-                    <textarea id="todo-comentario-ejecutor-${preguntaId}" rows="2" placeholder="Comentario o avance de quien ejecuta el To/Do..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white leading-tight">${valTodoComentarioEjecutor}</textarea>
+                    <textarea id="todo-comentario-ejecutor-${preguntaId}" rows="2" placeholder="Comentario o avance del ejecutor..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white leading-tight whitespace-pre-wrap break-words">${valTodoComentarioEjecutor}</textarea>
                   </div>
 
                   <div class="p-2 bg-white rounded border border-slate-200 space-y-2">
@@ -493,52 +550,28 @@
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- 3. QUICK LETT -->
-              <div class="p-2.5 bg-orange-50/60 rounded-lg border border-orange-200 space-y-2">
-                <button onclick="marcarQuickLetter('${preguntaId}')" id="btn-ql-${preguntaId}" 
-                        class="w-full py-2 text-xs font-bold rounded-lg transition shadow-sm flex items-center justify-center ${
-                          esQL === 'SI' 
-                          ? 'bg-orange-500 text-white border border-orange-600' 
-                          : 'bg-orange-100 text-orange-800 border border-orange-300 hover:bg-orange-500 hover:text-white'
-                        }">
-                  ${esQL === 'SI' ? 'ACTIVADO EN QUICK LETT' : 'Quick Lett'}
-                </button>
-                <input type="hidden" id="ql-val-${preguntaId}" value="${esQL}">
-                <textarea id="ql-obs-${preguntaId}" rows="2" placeholder="Escribe el detalle del hallazgo para Quick Lett..." class="w-full p-2 border border-orange-200 rounded-md text-xs outline-none focus:ring-1 focus:ring-orange-500 bg-white leading-tight">${valObservacionQL}</textarea>
-              </div>
+                <!-- Decisión Final Socio -->
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1.5 w-full">
+                  <label class="block text-[10px] font-bold text-slate-600 uppercase">Decisión Final (Socio)</label>
+                  <select id="socio-sel-${preguntaId}" class="w-full p-1.5 bg-white border border-slate-300 font-semibold text-xs rounded-md outline-none focus:ring-1 focus:ring-indigo-500">
+                    <option value="PENDIENTE" ${decisionSocioVal === 'PENDIENTE' ? 'selected' : ''}>Pendiente de Revisión</option>
+                    <option value="VA_OPINION" ${decisionSocioVal === 'VA_OPINION' ? 'selected' : ''}>SI VA a la Opinión Final</option>
+                    <option value="NO_VA" ${decisionSocioVal === 'NO_VA' ? 'selected' : ''}>NO VA (Desestimado / Corregido)</option>
+                  </select>
+                  <textarea id="socio-comment-${preguntaId}" rows="1" placeholder="Comentario sobre decisión final..." class="w-full p-1.5 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-indigo-500 bg-white leading-tight whitespace-pre-wrap break-words">${comentarioDecisionVal}</textarea>
+                </div>
 
-              <!-- 4. OPINIÓN -->
-              <div class="p-2.5 bg-rose-50/70 rounded-lg border border-rose-200 space-y-2">
-                <button onclick="toggleOpinion('${preguntaId}')" id="btn-op-${preguntaId}" 
-                        class="w-full py-1.5 text-xs font-bold rounded-md transition shadow-xs flex items-center justify-center ${
-                          esOpinion === 'SI' 
-                          ? 'bg-rose-600 text-white border border-rose-700' 
-                          : 'bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-600 hover:text-white'
-                        }">
-                  ${esOpinion === 'SI' ? 'ACTIVADO EN OPINIÓN' : 'Opinión'}
-                </button>
-                <input type="hidden" id="op-val-${preguntaId}" value="${esOpinion}">
-                <textarea id="op-text-${preguntaId}" rows="2" placeholder="Escribe el argumento o razón por la cual va a la opinión..." class="w-full p-2 border border-rose-200 rounded-md text-xs outline-none focus:ring-1 focus:ring-rose-500 bg-white leading-tight">${valOpinionText}</textarea>
               </div>
+            </div>
 
-              <!-- 5. DECISIÓN FINAL -->
-              <div class="bg-slate-100 p-2.5 rounded-lg border border-slate-300 space-y-2">
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">Decisión Final (A Opinión?)</label>
-                <select id="socio-sel-${preguntaId}" class="w-full p-2 bg-white border border-slate-300 font-semibold text-xs rounded-md outline-none focus:ring-1 focus:ring-indigo-500">
-                  <option value="PENDIENTE" ${decisionSocioVal === 'PENDIENTE' ? 'selected' : ''}>Pendiente de Revisión por el Socio</option>
-                  <option value="VA_OPINION" ${decisionSocioVal === 'VA_OPINION' ? 'selected' : ''}>SI VA a la Opinión Final</option>
-                  <option value="NO_VA" ${decisionSocioVal === 'NO_VA' ? 'selected' : ''}>NO VA (Desestimado / Corregido)</option>
-                </select>
-                <textarea id="socio-comment-${preguntaId}" rows="2" placeholder="Escribe un comentario sobre la decisión final..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-indigo-500 bg-white leading-tight">${comentarioDecisionVal}</textarea>
-              </div>
-
-              <button onclick="guardarPreguntaCompleta('${preguntaId}', ${tieneOpciones})" class="w-full py-2.5 text-xs font-bold rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition shadow">
+            <!-- Botón Guardar -->
+            <div class="mt-3 pt-2 border-t border-slate-100">
+              <button onclick="guardarPreguntaCompleta('${preguntaId}', ${tieneOpciones})" class="w-full py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition shadow">
                 Guardar Evaluación ${anioVal}
               </button>
-
             </div>
+
           </div>
         `;
       });
@@ -553,19 +586,23 @@
         return;
       }
 
-      let resultadoVal = '';
+      let opcionesSeleccionadas = [];
       if (tieneOpciones) {
-        const selObj = document.getElementById(`sel-${preguntaId}`);
-        if (selObj) resultadoVal = selObj.value;
+        const checkboxes = document.querySelectorAll(`input[name="opciones-${preguntaId}"]:checked`);
+        checkboxes.forEach(cb => opcionesSeleccionadas.push(cb.value));
       }
+
+      let resultadoVal = opcionesSeleccionadas.join(', ');
 
       const qlVal = document.getElementById(`ql-val-${preguntaId}`).value;
       if (qlVal === 'SI') {
-        resultadoVal = 'QUICK_LETTER';
+        resultadoVal = resultadoVal ? `${resultadoVal}, QUICK_LETTER` : 'QUICK_LETTER';
       }
 
       const respVal = document.getElementById(`resp-${preguntaId}`).value;
-      const obsQL = document.getElementById(`ql-obs-${preguntaId}`).value;
+      
+      const obsQLElem = document.getElementById(`ql-obs-text-${preguntaId}`);
+      const obsQL = obsQLElem ? obsQLElem.value : '';
 
       const esTodoVal = document.getElementById(`todo-val-${preguntaId}`).value === 'SI';
       const detailTodoVal = document.getElementById(`todo-text-${preguntaId}`).value;
@@ -583,7 +620,9 @@
       const revEmailVal = document.getElementById(`todo-reviso-email-${preguntaId}`).value;
 
       const esOpinionVal = document.getElementById(`op-val-${preguntaId}`).value === 'SI';
-      const detailOpinionVal = document.getElementById(`op-text-${preguntaId}`).value;
+      
+      const detailOpinionElem = document.getElementById(`op-text-input-${preguntaId}`);
+      const detailOpinionVal = detailOpinionElem ? detailOpinionElem.value : '';
 
       const decSocioVal = document.getElementById(`socio-sel-${preguntaId}`).value;
       const comSocioVal = document.getElementById(`socio-comment-${preguntaId}`).value;
@@ -672,22 +711,39 @@
               </td>
             `;
           } else {
-            let badges = [];
-            
-            if (resp.resultado === 'QUICK_LETTER') {
-              badges.push(`<span class="inline-block bg-orange-100 text-orange-800 font-bold border border-orange-300 px-1.5 py-0.5 rounded text-[10px]">Quick Lett</span>`);
-            } else if (resp.resultado && resp.resultado !== 'REDACCION') {
-              badges.push(`<span class="inline-block bg-indigo-100 text-indigo-800 font-bold border border-indigo-200 px-1.5 py-0.5 rounded text-[10px]">${resp.resultado}</span>`);
-            }
+            // Arrays separados para forzar el orden matemático e inalterable
+            let badgeOpciones = '';
+            let badgeTodo = '';
+            let badgeQuickLett = '';
+            let badgeOpinion = '';
 
+            // 1. Opciones Seleccionadas
+            if (resp.resultado) {
+              const resArr = resp.resultado.split(',').map(s => s.trim());
+              const filtrados = resArr.filter(rItem => rItem && rItem !== 'QUICK_LETTER' && rItem !== 'REDACCION');
+              if (filtrados.length > 0) {
+                badgeOpciones = filtrados.map(item => `<span class="inline-block bg-indigo-100 text-indigo-800 font-bold border border-indigo-200 px-1.5 py-0.5 rounded text-[10px]">${item}</span>`).join(' ');
+              }
+            }
+            
+            // 2. To/Do
             if (resp.es_todo) {
               const statusTodo = resp.todo_revisado ? 'To/Do Revisado' : 'To/Do Pendiente';
-              badges.push(`<span class="inline-block bg-slate-200 text-slate-800 font-bold border border-slate-300 px-1.5 py-0.5 rounded text-[10px]">${statusTodo}</span>`);
+              badgeTodo = `<span class="inline-block bg-slate-200 text-slate-800 font-bold border border-slate-300 px-1.5 py-0.5 rounded text-[10px]">${statusTodo}</span>`;
             }
 
-            if (resp.es_opinion) {
-              badges.push(`<span class="inline-block bg-rose-100 text-rose-800 font-bold border border-rose-300 px-1.5 py-0.5 rounded text-[10px]">Opinión</span>`);
+            // 3. Quick Lett
+            if (resp.resultado && resp.resultado.includes('QUICK_LETTER')) {
+              badgeQuickLett = `<span class="inline-block bg-orange-100 text-orange-800 font-bold border border-orange-300 px-1.5 py-0.5 rounded text-[10px]">Quick Lett</span>`;
             }
+
+            // 4. Opinión
+            if (resp.es_opinion) {
+              badgeOpinion = `<span class="inline-block bg-rose-100 text-rose-800 font-bold border border-rose-300 px-1.5 py-0.5 rounded text-[10px]">Opinión</span>`;
+            }
+
+            // Unimos los badges exactamente en la secuencia requerida
+            const badgesHTML = [badgeOpciones, badgeTodo, badgeQuickLett, badgeOpinion].filter(b => b !== '').join(' ');
 
             let badgeSocio = '';
             const comentarioSocio = resp.comentario_decision ? `<div class="italic text-[10px] mt-0.5 text-slate-600">${resp.comentario_decision}</div>` : '';
@@ -701,8 +757,8 @@
             }
 
             const respTexto = resp.respuesta || resp.observaciones || '';
-            const obsQLTexto = resp.observaciones_ql ? `<div class="text-[10px] text-orange-800 bg-orange-50 p-1 rounded border border-orange-200 mt-1"><strong>Quick Lett:</strong> ${resp.observaciones_ql}</div>` : '';
             
+            // Ordenamos también las cajas informativas internas
             let todoTexto = '';
             if (resp.es_todo) {
               todoTexto = `
@@ -716,6 +772,10 @@
               `;
             }
 
+            const obsQLTexto = (resp.resultado && resp.resultado.includes('QUICK_LETTER')) 
+              ? `<div class="text-[10px] text-orange-800 bg-orange-50 p-1 rounded border border-orange-200 mt-1"><strong>Quick Lett:</strong> ${resp.observaciones_ql || 'Sin detalle'}</div>` 
+              : '';
+
             let opinionTexto = '';
             if (resp.es_opinion) {
               opinionTexto = `<div class="text-[10px] text-rose-800 bg-rose-50 p-1 rounded border border-rose-200 mt-1"><strong>Opinión:</strong> ${resp.detalle_opinion || 'Sin detalle'}</div>`;
@@ -723,10 +783,10 @@
 
             celdasAnios += `
               <td class="p-3 border-r border-slate-200 align-top text-left text-xs space-y-1">
-                <div class="flex flex-wrap gap-1 mb-1">${badges.join(' ')}</div>
-                <div class="text-slate-800 leading-snug whitespace-pre-line">${respTexto}</div>
-                ${obsQLTexto}
+                <div class="flex flex-wrap gap-1 mb-1">${badgesHTML}</div>
+                <div class="text-slate-800 leading-snug whitespace-pre-wrap break-words">${respTexto}</div>
                 ${todoTexto}
+                ${obsQLTexto}
                 ${opinionTexto}
                 ${badgeSocio}
               </td>
@@ -763,7 +823,7 @@
         .from('respuestas_auditoria')
         .select('*')
         .eq('cliente_id', clienteIdVal)
-        .eq('resultado', 'QUICK_LETTER');
+        .ilike('resultado', '%QUICK_LETTER%');
 
       if (error || !respuestas || respuestas.length === 0) {
         contenedor.innerHTML = '<div class="col-span-full p-4 bg-orange-50 text-orange-800 text-xs rounded-xl border border-orange-200 text-center font-medium">No existen hallazgos de Quick Lett registrados para este cliente.</div>';
@@ -789,7 +849,7 @@
             <p class="text-xs font-semibold text-slate-800">${textoPreg}</p>
             <div class="p-2.5 bg-white rounded-lg border border-orange-200 text-xs text-slate-700">
               <strong class="text-orange-900 block mb-1">Detalle del Hallazgo:</strong>
-              ${r.observaciones_ql || r.respuesta || r.observaciones || 'Sin detalle escrito'}
+              <div class="whitespace-pre-wrap break-words">${r.observaciones_ql || r.respuesta || r.observaciones || 'Sin detalle escrito'}</div>
             </div>
           </div>
         `;
@@ -871,7 +931,7 @@
             <p class="text-xs font-semibold text-slate-800">${textoPreg}</p>
             <div class="p-2.5 bg-white rounded-lg border border-rose-200 text-xs text-slate-700 space-y-1">
               <strong class="text-rose-900 block">Argumento de Opinión:</strong>
-              <div>${r.detalle_opinion || r.respuesta || 'Sin argumento registrado'}</div>
+              <div class="whitespace-pre-wrap break-words">${r.detalle_opinion || r.respuesta || 'Sin argumento registrado'}</div>
               ${r.comentario_decision ? `<div class="pt-2 mt-2 border-t border-slate-100 text-[11px] text-slate-600 italic"><strong>Comentario Socio:</strong> ${r.comentario_decision}</div>` : ''}
             </div>
           </div>
