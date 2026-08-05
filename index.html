@@ -6,166 +6,391 @@
   <title>Sistema de Auditoría</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Lucide Icons para el Menú Lateral -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 p-2 sm:p-4 font-sans">
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans flex">
 
-  <div class="max-w-[98%] mx-auto bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden min-h-[92vh]">
-    
-    <!-- Encabezado con Modos de Vista -->
-    <div class="bg-indigo-600 px-4 py-3 sm:px-6 sm:py-4 text-white flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3">
-      <div>
-        <h1 class="text-base sm:text-xl font-bold tracking-tight">Auditoría</h1>
-        <p class="text-[11px] sm:text-xs text-indigo-200">Planificación, Monitoreo, Conclusiones</p>
+  <!-- ==================== MENÚ LATERAL (SIDEBAR) ==================== -->
+  <aside id="sidebar" class="w-64 bg-slate-900 text-slate-300 min-h-screen flex flex-col justify-between shrink-0 transition-all duration-300 shadow-xl z-20">
+    <div>
+      <!-- Header del Menú Lateral -->
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="bg-indigo-600 p-2 rounded-lg text-white">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <span class="font-bold text-white text-base tracking-wide">Firma Audit</span>
+        </div>
       </div>
-      
-      <!-- Pestañas de Navegación -->
-      <div class="flex flex-wrap bg-indigo-800/60 p-1 rounded-xl border border-indigo-400/30 gap-1">
-        <button id="tab-captura-btn" onclick="cambiarPestana('captura')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-900 shadow">
-          Captura por Año
-        </button>
-        <button id="tab-historico-btn" onclick="cambiarPestana('historico')" class="px-3 py-1.5 text-xs font-bold rounded-lg text-indigo-100 hover:text-white transition">
-          Histórico de Pregunta por Año
-        </button>
-        <button id="tab-todo-btn" onclick="cambiarPestana('todo')" class="px-3 py-1.5 text-xs font-bold rounded-lg text-indigo-100 hover:text-white transition">
-          Resumen To/Do
-        </button>
-        <button id="tab-quicklett-btn" onclick="cambiarPestana('quicklett')" class="px-3 py-1.5 text-xs font-bold rounded-lg text-indigo-100 hover:text-white transition">
-          Resumen Quick Lett
-        </button>
-        <button id="tab-opinion-btn" onclick="cambiarPestana('opinion')" class="px-3 py-1.5 text-xs font-bold rounded-lg text-indigo-100 hover:text-white transition">
-          Resumen Opinión
-        </button>
-      </div>
-    </div>
 
-    <div class="p-3 sm:p-6 space-y-4">
-
-      <!-- PASO 1: Selector Global (Cliente, Año y Aspecto) -->
-      <div class="bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200 space-y-3">
-        <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">1. Selección de Cliente, Año y Aspectos</h2>
+      <!-- Opciones del Menú -->
+      <nav class="p-3 space-y-1">
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-          
-          <!-- Cliente -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Cliente a Auditar</label>
-            <select id="select-cliente" onchange="ejecutarConsultaSegunVista()" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition">
-              <option value="">Cargando clientes...</option>
-            </select>
-          </div>
+        <!-- 1. Clientes -->
+        <button onclick="navegarMenu('clientes')" id="nav-clientes" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-white transition">
+          <i data-lucide="building-2" class="w-4 h-4"></i>
+          <span>1. Clientes</span>
+        </button>
 
-          <!-- Año de Evaluación -->
-          <div id="box-select-anio">
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Año a Evaluar</label>
-            <select id="select-anio" onchange="cargarPreguntas()" class="w-full p-2 bg-slate-900 font-bold text-white rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-slate-700 outline-none shadow-sm transition">
-              <option value="2027">Año 2027</option>
-              <option value="2026" selected>Año 2026</option>
-              <option value="2025">Año 2025</option>
-              <option value="2024">Año 2024</option>
-            </select>
-          </div>
+        <!-- 2. Usuarios / Auditores -->
+        <button onclick="navegarMenu('usuarios')" id="nav-usuarios" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-white transition">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>2. Usuarios / Auditores</span>
+        </button>
 
-          <!-- Aspecto -->
-          <div id="box-select-aspecto">
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Aspecto a Evaluar</label>
-            <select id="select-aspecto" onchange="ejecutarConsultaSegunVista()" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition">
-              <option value="">Cargando aspectos...</option>
-            </select>
-          </div>
+        <!-- 3. Auditoría (Módulo principal) -->
+        <button onclick="navegarMenu('auditoria')" id="nav-auditoria" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition">
+          <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+          <span>3. Auditoría</span>
+        </button>
 
-        </div>
-      </div>
+        <!-- 4. Visitas -->
+        <button onclick="navegarMenu('visitas')" id="nav-visitas" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-white transition">
+          <i data-lucide="calendar" class="w-4 h-4"></i>
+          <span>4. Visitas (Calendario)</span>
+        </button>
 
-      <!-- VISTA 1: Cuestionario de Evaluación (Tarjetas) -->
-      <div id="vista-captura">
-        <div class="flex justify-between items-center mb-3">
-          <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">2. Cuestionario de Evaluación</h2>
-          <span id="contador-preguntas" class="text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-md">0 Preguntas</span>
-        </div>
+        <!-- 5. Asignación de Cuentas -->
+        <button onclick="navegarMenu('asignacion')" id="nav-asignacion" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-white transition">
+          <i data-lucide="folder-git-2" class="w-4 h-4"></i>
+          <span>5. Asignación de Cuentas</span>
+        </button>
 
-        <div id="contenedor-preguntas" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">
-            Selecciona un cliente, año y un aspecto arriba para cargar el cuestionario.
-          </p>
-        </div>
-      </div>
-
-      <!-- VISTA 2: Histórico Comparativo -->
-      <div id="vista-historico" class="hidden space-y-3">
-        <div class="flex justify-between items-center mb-2">
-          <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">2. Comparativa Histórica Pregunta por Pregunta (Multianual)</h2>
-          <span id="contador-historico" class="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md">0 Preguntas</span>
-        </div>
-
-        <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm bg-white">
-          <table class="w-full text-left text-xs text-slate-700 border-collapse">
-            <thead class="bg-slate-100 text-slate-600 uppercase text-[10px] font-bold border-b border-slate-200">
-              <tr>
-                <th class="p-3 w-1/4 border-r border-slate-200 min-w-[220px]">Pregunta / Criterio</th>
-                <th class="p-3 w-1/4 text-center border-r border-slate-200 min-w-[180px] bg-amber-50">2024</th>
-                <th class="p-3 w-1/4 text-center border-r border-slate-200 min-w-[180px] bg-indigo-50">2025</th>
-                <th class="p-3 w-1/4 text-center border-r border-slate-200 min-w-[180px] bg-slate-900 text-white">2026</th>
-                <th class="p-3 w-1/4 text-center min-w-[180px] bg-purple-50">2027</th>
-              </tr>
-            </thead>
-            <tbody id="tabla-historico-body" class="divide-y divide-slate-200">
-              <tr>
-                <td colspan="5" class="p-8 text-center text-slate-400">
-                  Selecciona un cliente y un aspecto arriba para desplegar la comparativa multianual.
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- VISTA 3: Resumen To/Do (Acumulado) -->
-      <div id="vista-todo" class="hidden space-y-3">
-        <div class="flex justify-between items-center mb-2">
-          <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-700">2. Acumulado de Pendientes To/Do (Todos los Aspectos)</h2>
-          <span id="contador-todo" class="text-xs font-bold text-slate-800 bg-slate-200 border border-slate-300 px-2.5 py-0.5 rounded-md">0 Pendientes</span>
-        </div>
-
-        <div id="contenedor-resumen-todo" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">
-            Selecciona un cliente arriba para ver el acumulado de To/Do.
-          </p>
-        </div>
-      </div>
-
-      <!-- VISTA 4: Resumen Quick Lett (Acumulado) -->
-      <div id="vista-quicklett" class="hidden space-y-3">
-        <div class="flex justify-between items-center mb-2">
-          <h2 class="text-[11px] font-bold uppercase tracking-wider text-orange-600">2. Acumulado de Hallazgos Quick Lett (Todos los Aspectos)</h2>
-          <span id="contador-ql" class="text-xs font-bold text-orange-700 bg-orange-50 border border-orange-200 px-2.5 py-0.5 rounded-md">0 Hallazgos</span>
-        </div>
-
-        <div id="contenedor-resumen-ql" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">
-            Selecciona un cliente arriba para ver el acumulado de Quick Lett.
-          </p>
-        </div>
-      </div>
-
-      <!-- VISTA 5: Resumen Opinión (Acumulado) -->
-      <div id="vista-opinion" class="hidden space-y-3">
-        <div class="flex justify-between items-center mb-2">
-          <h2 class="text-[11px] font-bold uppercase tracking-wider text-rose-600">2. Acumulado de Puntos para Opinión (Todos los Aspectos)</h2>
-          <div class="flex items-center gap-2">
-            <span id="estado-global-opinion" class="text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-md">Sin Estado</span>
-            <span id="contador-opinion" class="text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-md">0 Casos</span>
-          </div>
-        </div>
-
-        <div id="contenedor-resumen-opinion" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">
-            Selecciona un cliente arriba para ver el acumulado de Puntos para Opinión.
-          </p>
-        </div>
-      </div>
-
+      </nav>
     </div>
-  </div>
+
+    <!-- User Footer Panel -->
+    <div class="p-3 border-t border-slate-800 text-[11px] text-slate-500 flex items-center gap-2">
+      <i data-lucide="user-check" class="w-4 h-4 text-emerald-400"></i>
+      <span>Sistema de Gestión v2.0</span>
+    </div>
+  </aside>
+
+  <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+  <main class="flex-1 p-2 sm:p-4 overflow-y-auto max-h-screen">
+    
+    <!-- 1. SECCIÓN: CLIENTES -->
+    <section id="sec-clientes" class="hidden bg-white rounded-2xl shadow-xl border border-slate-200 p-6 min-h-[92vh] space-y-6">
+      <div class="flex justify-between items-center border-b pb-4">
+        <div>
+          <h1 class="text-xl font-bold text-slate-800">Gestión de Clientes</h1>
+          <p class="text-xs text-slate-500">Crea, edita y administra la lista de clientes para auditar</p>
+        </div>
+      </div>
+
+      <!-- Formulario Crear/Editar Cliente -->
+      <form onsubmit="guardarNuevoCliente(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+        <input type="hidden" id="cli-editando-id" value="">
+        
+        <div>
+          <button type="submit" id="btn-guardar-cli" class="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition shadow">
+            + Crear Cliente
+          </button>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">ID Cliente (cliente_id)</label>
+          <input type="text" id="cli-id" required placeholder="Ej. CLI-001" class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Nombre Corto</label>
+          <input type="text" id="cli-nombre-corto" required placeholder="Ej. ABC" class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Nombre Completo</label>
+          <input type="text" id="cli-nombre-completo" required placeholder="Ej. Corporación ABC S.A." class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+        </div>
+        <div id="box-cancelar-edicion" class="hidden">
+          <button type="button" onclick="cancelarEdicionCliente()" class="w-full py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-300 transition">
+            Cancelar Edición
+          </button>
+        </div>
+      </form>
+
+      <!-- Tabla de Clientes Existentes -->
+      <div class="overflow-x-auto border border-slate-200 rounded-xl">
+        <table class="w-full text-left text-xs text-slate-700">
+          <thead class="bg-slate-100 uppercase text-[10px] font-bold text-slate-600 border-b">
+            <tr>
+              <th class="p-3">ID (cliente_id)</th>
+              <th class="p-3">Nombre Corto</th>
+              <th class="p-3">Nombre Completo</th>
+              <th class="p-3 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-clientes-body" class="divide-y divide-slate-200">
+            <tr><td colspan="4" class="p-4 text-center text-slate-400">Cargando clientes...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 2. SECCIÓN: USUARIOS / AUDITORES -->
+    <section id="sec-usuarios" class="hidden bg-white rounded-2xl shadow-xl border border-slate-200 p-6 min-h-[92vh] space-y-6">
+      <div class="flex justify-between items-center border-b pb-4">
+        <div>
+          <h1 class="text-xl font-bold text-slate-800">Gestión de Usuarios / Auditores</h1>
+          <p class="text-xs text-slate-500">Administra el personal auditor asignado a la firma</p>
+        </div>
+      </div>
+
+      <!-- Formulario Crear Usuario -->
+      <form onsubmit="guardarNuevoUsuario(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Nombre Completo</label>
+          <input type="text" id="usr-nombre" required placeholder="Ej. Juan Pérez" class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Correo Electrónico</label>
+          <input type="email" id="usr-email" required placeholder="juan@firma.com" class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Rol</label>
+          <select id="usr-rol" class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+            <option value="Auditor Senior">Auditor Senior</option>
+            <option value="Auditor Junior">Auditor Junior</option>
+            <option value="Socio">Socio</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <button type="submit" class="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition">
+            + Crear Auditor
+          </button>
+        </div>
+      </form>
+
+      <!-- Tabla Usuarios -->
+      <div class="overflow-x-auto border border-slate-200 rounded-xl">
+        <table class="w-full text-left text-xs text-slate-700">
+          <thead class="bg-slate-100 uppercase text-[10px] font-bold text-slate-600 border-b">
+            <tr>
+              <th class="p-3">ID</th>
+              <th class="p-3">Nombre</th>
+              <th class="p-3">Email</th>
+              <th class="p-3">Rol</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-usuarios-body" class="divide-y divide-slate-200">
+            <tr><td colspan="4" class="p-4 text-center text-slate-400">Cargando usuarios...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 3. SECCIÓN: AUDITORÍA -->
+    <section id="sec-auditoria" class="max-w-[98%] mx-auto bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden min-h-[92vh]">
+      
+      <!-- Encabezado con Modos de Vista -->
+      <div class="bg-indigo-600 px-4 py-3 sm:px-6 sm:py-4 text-white flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3">
+        <div>
+          <h1 class="text-base sm:text-xl font-bold tracking-tight">Auditoría</h1>
+          <p class="text-[11px] sm:text-xs text-indigo-200">Planificación, Monitoreo, Conclusiones</p>
+        </div>
+        
+        <!-- Pestañas de Navegación Interna -->
+        <div class="flex flex-wrap bg-indigo-800/60 p-1 rounded-xl border border-indigo-400/30 gap-1">
+          <button id="tab-captura-btn" onclick="cambiarPestana('captura')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-white text-indigo-900 shadow">
+            Captura por Año
+          </button>
+          <button id="tab-historico-btn" onclick="cambiarPestana('historico')" class="px-3 py-1.5 text-xs font-bold rounded-lg text-indigo-100 hover:text-white transition">
+            Histórico de Pregunta por Año
+          </button>
+          <button id="tab-todo-btn" onclick="cambiarPestana('todo')" class="px-3 py-1.5 text-xs font-bold rounded-lg text-indigo-100 hover:text-white transition">
+            Resumen To/Do
+          </button>
+          <button id="tab-quicklett-btn" onclick="cambiarPestana('quicklett')" class="px-3 py-1.5 text-xs font-bold rounded-lg text-indigo-100 hover:text-white transition">
+            Resumen Quick Lett
+          </button>
+          <button id="tab-opinion-btn" onclick="cambiarPestana('opinion')" class="px-3 py-1.5 text-xs font-bold rounded-lg text-indigo-100 hover:text-white transition">
+            Resumen Opinión
+          </button>
+        </div>
+      </div>
+
+      <div class="p-3 sm:p-6 space-y-4">
+
+        <!-- PASO 1: Selector Global -->
+        <div class="bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200 space-y-3">
+          <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">1. Selección de Cliente, Año y Aspectos</h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Cliente a Auditar</label>
+              <select id="select-cliente" onchange="ejecutarConsultaSegunVista()" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition">
+                <option value="">Cargando clientes...</option>
+              </select>
+            </div>
+
+            <div id="box-select-anio">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Año a Evaluar</label>
+              <select id="select-anio" onchange="cargarPreguntas()" class="w-full p-2 bg-slate-900 font-bold text-white rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-slate-700 outline-none shadow-sm transition">
+                <option value="2027">Año 2027</option>
+                <option value="2026" selected>Año 2026</option>
+                <option value="2025">Año 2025</option>
+                <option value="2024">Año 2024</option>
+              </select>
+            </div>
+
+            <div id="box-select-aspecto">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Aspecto a Evaluar</label>
+              <select id="select-aspecto" onchange="ejecutarConsultaSegunVista()" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm transition">
+                <option value="">Cargando aspectos...</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- VISTA 1: Cuestionario -->
+        <div id="vista-captura">
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">2. Cuestionario de Evaluación</h2>
+            <span id="contador-preguntas" class="text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-md">0 Preguntas</span>
+          </div>
+
+          <div id="contenedor-preguntas" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">
+              Selecciona un cliente, año y un aspecto arriba para cargar el cuestionario.
+            </p>
+          </div>
+        </div>
+
+        <!-- VISTA 2: Histórico -->
+        <div id="vista-historico" class="hidden space-y-3">
+          <div class="flex justify-between items-center mb-2">
+            <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">2. Comparativa Histórica Pregunta por Pregunta (Multianual)</h2>
+            <span id="contador-historico" class="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md">0 Preguntas</span>
+          </div>
+
+          <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm bg-white">
+            <table class="w-full text-left text-xs text-slate-700 border-collapse">
+              <thead class="bg-slate-100 text-slate-600 uppercase text-[10px] font-bold border-b border-slate-200">
+                <tr>
+                  <th class="p-3 w-1/4 border-r border-slate-200 min-w-[220px]">Pregunta / Criterio</th>
+                  <th class="p-3 w-1/4 text-center border-r border-slate-200 min-w-[180px] bg-amber-50">2024</th>
+                  <th class="p-3 w-1/4 text-center border-r border-slate-200 min-w-[180px] bg-indigo-50">2025</th>
+                  <th class="p-3 w-1/4 text-center border-r border-slate-200 min-w-[180px] bg-slate-900 text-white">2026</th>
+                  <th class="p-3 w-1/4 text-center min-w-[180px] bg-purple-50">2027</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-historico-body" class="divide-y divide-slate-200">
+                <tr>
+                  <td colspan="5" class="p-8 text-center text-slate-400">
+                    Selecciona un cliente y un aspecto arriba para desplegar la comparativa multianual.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- VISTA 3: Resumen To/Do -->
+        <div id="vista-todo" class="hidden space-y-3">
+          <div class="flex justify-between items-center mb-2">
+            <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-700">2. Acumulado de Pendientes To/Do (Todos los Aspectos)</h2>
+            <span id="contador-todo" class="text-xs font-bold text-slate-800 bg-slate-200 border border-slate-300 px-2.5 py-0.5 rounded-md">0 Pendientes</span>
+          </div>
+
+          <div id="contenedor-resumen-todo" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">
+              Selecciona un cliente arriba para ver el acumulado de To/Do.
+            </p>
+          </div>
+        </div>
+
+        <!-- VISTA 4: Resumen Quick Lett -->
+        <div id="vista-quicklett" class="hidden space-y-3">
+          <div class="flex justify-between items-center mb-2">
+            <h2 class="text-[11px] font-bold uppercase tracking-wider text-orange-600">2. Acumulado de Hallazgos Quick Lett (Todos los Aspectos)</h2>
+            <span id="contador-ql" class="text-xs font-bold text-orange-700 bg-orange-50 border border-orange-200 px-2.5 py-0.5 rounded-md">0 Hallazgos</span>
+          </div>
+
+          <div id="contenedor-resumen-ql" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">
+              Selecciona un cliente arriba para ver el acumulado de Quick Lett.
+            </p>
+          </div>
+        </div>
+
+        <!-- VISTA 5: Resumen Opinión -->
+        <div id="vista-opinion" class="hidden space-y-3">
+          <div class="flex justify-between items-center mb-2">
+            <h2 class="text-[11px] font-bold uppercase tracking-wider text-rose-600">2. Acumulado de Puntos para Opinión (Todos los Aspectos)</h2>
+            <div class="flex items-center gap-2">
+              <span id="estado-global-opinion" class="text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-md">Sin Estado</span>
+              <span id="contador-opinion" class="text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-md">0 Casos</span>
+            </div>
+          </div>
+
+          <div id="contenedor-resumen-opinion" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">
+              Selecciona un cliente arriba para ver el acumulado de Puntos para Opinión.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 4. SECCIÓN: VISITAS -->
+    <section id="sec-visitas" class="hidden bg-white rounded-2xl shadow-xl border border-slate-200 p-6 min-h-[92vh] space-y-6">
+      <div class="flex justify-between items-center border-b pb-4">
+        <div>
+          <h1 class="text-xl font-bold text-slate-800">Programación de Visitas</h1>
+          <p class="text-xs text-slate-500">Programa las visitas presenciales o remotas asignadas por cliente y auditor</p>
+        </div>
+      </div>
+
+      <form onsubmit="guardarVisita(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Cliente</label>
+          <select id="vis-cliente" required class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+            <option value="">Seleccione Cliente...</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Auditor Asignado</label>
+          <select id="vis-auditor" required class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+            <option value="">Seleccione Auditor...</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Fecha Programada</label>
+          <input type="date" id="vis-fecha" required class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+        </div>
+        <div class="flex items-end">
+          <button type="submit" class="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition">
+            + Agendar Visita
+          </button>
+        </div>
+      </form>
+
+      <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
+        <h2 class="text-xs font-bold text-slate-700 uppercase mb-3">Visitas Agendadas</h2>
+        <div id="lista-visitas" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <p class="text-xs text-slate-400 col-span-full">No hay visitas programadas aún.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. SECCIÓN: ASIGNACIÓN DE CUENTAS -->
+    <section id="sec-asignacion" class="hidden bg-white rounded-2xl shadow-xl border border-slate-200 p-6 min-h-[92vh] space-y-6">
+      <div class="flex justify-between items-center border-b pb-4">
+        <div>
+          <h1 class="text-xl font-bold text-slate-800">Asignación de Cuentas / Rubros</h1>
+          <p class="text-xs text-slate-500">Asigna cuentas contables específicas a cada auditor</p>
+        </div>
+      </div>
+
+      <div class="p-6 bg-indigo-50 border border-indigo-200 rounded-xl text-xs text-indigo-900 flex items-start gap-3">
+        <i data-lucide="info" class="w-5 h-5 shrink-0 text-indigo-600"></i>
+        <div>
+          <strong class="block font-bold">Módulo listo para vincular tabla Supabase:</strong>
+          <span>Esta sección está lista para conectar con la tabla que tienes pendiente por crear (`asignaciones_cuentas`).</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
 
   <script>
     const SUPABASE_URL = 'https://yyjeqklvrhezprrkdfof.supabase.co';
@@ -174,16 +399,238 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let pestanaActual = 'captura';
+    let listaClientesCache = [];
 
     document.addEventListener("DOMContentLoaded", function() {
+      lucide.createIcons();
       iniciar();
     });
 
     async function iniciar() {
       await cargarClientes();
       await cargarAspectos();
+      await cargarUsuariosTabla();
+      await cargarSelectsAuxiliares();
     }
 
+    // NAVEGACIÓN MENÚ LATERAL
+    function navegarMenu(seccion) {
+      const secciones = ['clientes', 'usuarios', 'auditoria', 'visitas', 'asignacion'];
+      secciones.forEach(sec => {
+        document.getElementById(`sec-${sec}`).classList.add('hidden');
+        const btn = document.getElementById(`nav-${sec}`);
+        if (btn) {
+          btn.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-white transition";
+        }
+      });
+
+      document.getElementById(`sec-${seccion}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`nav-${seccion}`);
+      if (activeBtn) {
+        activeBtn.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-lg transition";
+      }
+    }
+
+    // GESTIÓN DE CLIENTES (CREAR Y EDITAR)
+    async function cargarClientes() {
+      const select = document.getElementById('select-cliente');
+      const selectVis = document.getElementById('vis-cliente');
+      const tbody = document.getElementById('tabla-clientes-body');
+      
+      // ORDENAMIENTO ALFABÉTICO AUTOMÁTICO POR NOMBRE_CORTO
+      const { data: clientes, error } = await supabaseClient
+        .from('clientes')
+        .select('*')
+        .order('nombre_corto', { ascending: true });
+
+      if (error) {
+        console.error("Error Supabase Clientes:", error);
+        select.innerHTML = `<option value="">Error: ${error.message}</option>`;
+        return;
+      }
+
+      listaClientesCache = clientes || [];
+
+      select.innerHTML = '<option value="">-- Selecciona un Cliente --</option>';
+      if (selectVis) selectVis.innerHTML = '<option value="">-- Selecciona un Cliente --</option>';
+      tbody.innerHTML = '';
+
+      if (clientes && clientes.length > 0) {
+        clientes.forEach(c => {
+          const idCliente = c.cliente_id || c.id;
+          const nombreCorto = c.nombre_corto || '-';
+          const nombreCompleto = c.nombre_completo || c.razon_social || c.nombre || '-';
+          
+          const textoOpcionSelect = c.nombre_corto 
+            ? `${c.nombre_corto} (${nombreCompleto})` 
+            : nombreCompleto;
+
+          select.innerHTML += `<option value="${idCliente}">${textoOpcionSelect}</option>`;
+          if (selectVis) selectVis.innerHTML += `<option value="${idCliente}">${textoOpcionSelect}</option>`;
+          
+          tbody.innerHTML += `
+            <tr class="hover:bg-slate-50">
+              <td class="p-3 border-b font-mono text-indigo-700 font-bold">${idCliente}</td>
+              <td class="p-3 border-b font-bold text-slate-800">${nombreCorto}</td>
+              <td class="p-3 border-b">${nombreCompleto}</td>
+              <td class="p-3 border-b text-center">
+                <button onclick="prepararEdicionCliente('${idCliente}')" class="px-2.5 py-1 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border border-emerald-300 font-bold rounded text-[11px] transition">
+                  Editar
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      } else {
+        select.innerHTML = '<option value="">No hay clientes registrados</option>';
+        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">Sin clientes.</td></tr>';
+      }
+    }
+
+    function prepararEdicionCliente(clienteId) {
+      const cliente = listaClientesCache.find(c => String(c.cliente_id || c.id) === String(clienteId));
+      if (!cliente) return;
+
+      document.getElementById('cli-editando-id').value = clienteId;
+      document.getElementById('cli-id').value = cliente.cliente_id || cliente.id;
+      document.getElementById('cli-id').readOnly = true; // No modificar llave primaria al editar
+      document.getElementById('cli-id').classList.add('bg-slate-100');
+
+      document.getElementById('cli-nombre-corto').value = cliente.nombre_corto || '';
+      document.getElementById('cli-nombre-completo').value = cliente.nombre_completo || cliente.razon_social || '';
+
+      const btnGuardar = document.getElementById('btn-guardar-cli');
+      btnGuardar.textContent = "Actualizar Cliente";
+      btnGuardar.className = "w-full py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition shadow";
+
+      document.getElementById('box-cancelar-edicion').classList.remove('hidden');
+    }
+
+    function cancelarEdicionCliente() {
+      document.getElementById('cli-editando-id').value = '';
+      document.getElementById('cli-id').value = '';
+      document.getElementById('cli-id').readOnly = false;
+      document.getElementById('cli-id').classList.remove('bg-slate-100');
+
+      document.getElementById('cli-nombre-corto').value = '';
+      document.getElementById('cli-nombre-completo').value = '';
+
+      const btnGuardar = document.getElementById('btn-guardar-cli');
+      btnGuardar.textContent = "+ Crear Cliente";
+      btnGuardar.className = "w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition shadow";
+
+      document.getElementById('box-cancelar-edicion').classList.add('hidden');
+    }
+
+    async function guardarNuevoCliente(e) {
+      e.preventDefault();
+      const editandoId = document.getElementById('cli-editando-id').value;
+      const cliente_id = document.getElementById('cli-id').value.trim();
+      const nombre_corto = document.getElementById('cli-nombre-corto').value.trim();
+      const nombre_completo = document.getElementById('cli-nombre-completo').value.trim();
+
+      if (editandoId) {
+        // Modo Edición (UPDATE)
+        const { error } = await supabaseClient
+          .from('clientes')
+          .update({ nombre_corto, nombre_completo })
+          .eq('cliente_id', editandoId);
+
+        if (error) {
+          alert("Error al actualizar cliente: " + error.message);
+        } else {
+          alert("¡Cliente actualizado correctamente!");
+          cancelarEdicionCliente();
+          cargarClientes();
+        }
+      } else {
+        // VERIFICACIÓN DE CLIENTE_ID DUPLICADO ANTES DE CREAR
+        const { data: existente } = await supabaseClient
+          .from('clientes')
+          .select('cliente_id')
+          .eq('cliente_id', cliente_id)
+          .maybeSingle();
+
+        if (existente) {
+          alert(`El ID de cliente "${cliente_id}" ya está registrado. Por favor, utiliza un ID diferente.`);
+          return;
+        }
+
+        // Modo Inserción (INSERT)
+        const { error } = await supabaseClient.from('clientes').insert([
+          { cliente_id, nombre_corto, nombre_completo }
+        ]);
+
+        if (error) {
+          alert("Error al guardar cliente: " + error.message);
+        } else {
+          alert("¡Cliente creado con éxito!");
+          cancelarEdicionCliente();
+          cargarClientes();
+        }
+      }
+    }
+
+    // GESTIÓN DE USUARIOS / AUDITORES
+    async function cargarUsuariosTabla() {
+      const tbody = document.getElementById('tabla-usuarios-body');
+      const selectVis = document.getElementById('vis-auditor');
+
+      const { data: usuarios, error } = await supabaseClient.from('usuarios').select('*');
+      if (error) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-rose-500">Error: ${error.message}</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      if (selectVis) selectVis.innerHTML = '<option value="">-- Selecciona Auditor --</option>';
+
+      if (usuarios && usuarios.length > 0) {
+        usuarios.forEach(u => {
+          const uid = u.usuario_id || u.id;
+          const nombre = u.nombre || u.nombre_completo || 'Sin Nombre';
+          
+          tbody.innerHTML += `
+            <tr class="hover:bg-slate-50">
+              <td class="p-3 border-b">${uid}</td>
+              <td class="p-3 border-b font-semibold">${nombre}</td>
+              <td class="p-3 border-b">${u.email || u.correo || '-'}</td>
+              <td class="p-3 border-b"><span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[10px] font-bold">${u.rol || 'Auditor'}</span></td>
+            </tr>
+          `;
+
+          if (selectVis) selectVis.innerHTML += `<option value="${uid}">${nombre}</option>`;
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">No hay usuarios registrados.</td></tr>';
+      }
+    }
+
+    async function guardarNuevoUsuario(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('usr-nombre').value;
+      const email = document.getElementById('usr-email').value;
+      const rol = document.getElementById('usr-rol').value;
+
+      const { error } = await supabaseClient.from('usuarios').insert([{ nombre, email, rol }]);
+      if (error) alert("Error al crear usuario: " + error.message);
+      else {
+        alert("¡Usuario creado exitosamente!");
+        document.getElementById('usr-nombre').value = '';
+        document.getElementById('usr-email').value = '';
+        cargarUsuariosTabla();
+      }
+    }
+
+    // AUXILIARES VISITAS
+    async function cargarSelectsAuxiliares() {}
+
+    function guardarVisita(e) {
+      e.preventDefault();
+      alert("Visita agendada (puedes enlazar la tabla 'visitas' en Supabase).");
+    }
+
+    // LÓGICA DE AUDITORÍA
     function cambiarPestana(modo) {
       pestanaActual = modo;
       
@@ -258,28 +705,6 @@
         cargarResumenQuickLett();
       } else if (pestanaActual === 'opinion') {
         cargarResumenOpinion();
-      }
-    }
-
-    async function cargarClientes() {
-      const select = document.getElementById('select-cliente');
-      const { data: clientes, error } = await supabaseClient.from('clientes').select('*');
-
-      if (error) {
-        console.error("Error Supabase Clientes:", error);
-        select.innerHTML = `<option value="">Error: ${error.message}</option>`;
-        return;
-      }
-
-      select.innerHTML = '<option value="">-- Selecciona un Cliente --</option>';
-      if (clientes && clientes.length > 0) {
-        clientes.forEach(c => {
-          const idCliente = c.cliente_id || c.id || c.id_cliente;
-          const nombreMostrar = c.nombre_corto || c.razon_social || c.nombre || `Cliente #${idCliente}`;
-          select.innerHTML += `<option value="${idCliente}">${nombreMostrar}</option>`;
-        });
-      } else {
-        select.innerHTML = '<option value="">No hay clientes registrados</option>';
       }
     }
 
@@ -460,7 +885,6 @@
         contenedor.innerHTML += `
           <div class="p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-indigo-300 transition flex flex-col justify-between">
             
-            <!-- Encabezado de Pregunta -->
             <div class="mb-3 border-b border-slate-100 pb-2">
               <div class="flex justify-between items-center mb-1.5">
                 <span class="text-[10px] font-bold bg-slate-900 text-white px-2 py-0.5 rounded-md">
@@ -471,13 +895,9 @@
               <p class="text-xs sm:text-sm font-semibold text-slate-800 leading-snug">${textoPregunta}</p>
             </div>
 
-            <!-- Estructura: Botones compactos a la izquierda (1. To/Do, 2. Quick Lett, 3. Opinión) -->
             <div class="grid grid-cols-12 gap-3 items-start">
-              
-              <!-- COLUMNA IZQUIERDA: Orden fijo de botones -->
               <div class="col-span-12 sm:col-span-3 lg:col-span-2 flex flex-col gap-1.5 min-w-[85px]">
                 
-                <!-- 1. Botón To/Do -->
                 <button onclick="toggleTodo('${preguntaId}')" id="btn-todo-${preguntaId}" 
                         class="w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center whitespace-nowrap ${
                           esTodo === 'SI' 
@@ -488,7 +908,6 @@
                 </button>
                 <input type="hidden" id="todo-val-${preguntaId}" value="${esTodo}">
 
-                <!-- 2. Botón Quick Lett -->
                 <button onclick="marcarQuickLetter('${preguntaId}')" id="btn-ql-${preguntaId}" 
                         class="w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center whitespace-nowrap ${
                           esQL === 'SI' 
@@ -499,7 +918,6 @@
                 </button>
                 <input type="hidden" id="ql-val-${preguntaId}" value="${esQL}">
 
-                <!-- 3. Botón Opinión -->
                 <button onclick="toggleOpinion('${preguntaId}')" id="btn-op-${preguntaId}" 
                         class="w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center whitespace-nowrap ${
                           esOpinion === 'SI' 
@@ -512,30 +930,24 @@
 
               </div>
 
-              <!-- COLUMNA DERECHA: Respuestas y Campos Amplios -->
               <div class="col-span-12 sm:col-span-9 lg:col-span-10 space-y-3 w-full">
-                
                 ${htmlSeleccion}
 
-                <!-- Textarea de Respuesta Principal -->
                 <div class="w-full">
                   <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Respuesta Detallada (${anioVal})</label>
                   <textarea id="resp-${preguntaId}" rows="3" placeholder="Escribe la respuesta detallada..." class="w-full p-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50 focus:bg-white leading-relaxed whitespace-pre-wrap break-words">${valRespuestaText}</textarea>
                 </div>
 
-                <!-- Detalle Quick Lett -->
                 <div id="ql-obs-${preguntaId}" class="${esQL === 'SI' ? 'block' : 'hidden'} p-2 bg-orange-50 rounded-lg border border-orange-200 w-full">
                   <label class="block text-[10px] font-bold text-orange-900 uppercase mb-1">Detalle del Hallazgo (Quick Lett)</label>
                   <textarea id="ql-obs-text-${preguntaId}" rows="2" placeholder="Escribe el detalle del hallazgo para Quick Lett..." class="w-full p-2 border border-orange-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-orange-500 bg-white leading-tight whitespace-pre-wrap break-words">${valObservacionQL}</textarea>
                 </div>
 
-                <!-- Detalle Opinión -->
                 <div id="op-text-${preguntaId}" class="${esOpinion === 'SI' ? 'block' : 'hidden'} p-2 bg-rose-50 rounded-lg border border-rose-200 w-full">
                   <label class="block text-[10px] font-bold text-rose-900 uppercase mb-1">Argumento para Opinión</label>
                   <textarea id="op-text-input-${preguntaId}" rows="2" placeholder="Escribe el argumento para la opinión..." class="w-full p-2 border border-rose-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-rose-500 bg-white leading-tight whitespace-pre-wrap break-words">${valOpinionText}</textarea>
                 </div>
 
-                <!-- Panel Campos TO/DO -->
                 <div id="panel-todo-fields-${preguntaId}" class="${esTodo === 'SI' ? 'block' : 'hidden'} p-2.5 bg-slate-100 rounded-lg border border-slate-300 space-y-2 w-full">
                   <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Detalle To/Do</label>
@@ -579,7 +991,6 @@
                   </div>
                 </div>
 
-                <!-- Decisión Final Socio -->
                 <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1.5 w-full">
                   <label class="block text-[10px] font-bold text-slate-600 uppercase">Decisión Final (Socio)</label>
                   <select id="socio-sel-${preguntaId}" class="w-full p-1.5 bg-white border border-slate-300 font-semibold text-xs rounded-md outline-none focus:ring-1 focus:ring-indigo-500">
@@ -593,7 +1004,6 @@
               </div>
             </div>
 
-            <!-- Botón Guardar -->
             <div class="mt-3 pt-2 border-t border-slate-100">
               <button onclick="guardarPreguntaCompleta('${preguntaId}', ${tieneOpciones})" class="w-full py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition shadow">
                 Guardar Evaluación ${anioVal}
@@ -628,7 +1038,6 @@
       }
 
       const respVal = document.getElementById(`resp-${preguntaId}`).value;
-      
       const obsQLElem = document.getElementById(`ql-obs-text-${preguntaId}`);
       const obsQL = obsQLElem ? obsQLElem.value : '';
 
@@ -648,7 +1057,6 @@
       const revEmailVal = document.getElementById(`todo-reviso-email-${preguntaId}`).value;
 
       const esOpinionVal = document.getElementById(`op-val-${preguntaId}`).value === 'SI';
-      
       const detailOpinionElem = document.getElementById(`op-text-input-${preguntaId}`);
       const detailOpinionVal = detailOpinionElem ? detailOpinionElem.value : '';
 
@@ -739,13 +1147,11 @@
               </td>
             `;
           } else {
-            // Arrays separados para forzar el orden matemático e inalterable
             let badgeOpciones = '';
             let badgeTodo = '';
             let badgeQuickLett = '';
             let badgeOpinion = '';
 
-            // 1. Opciones Seleccionadas
             if (resp.resultado) {
               const resArr = resp.resultado.split(',').map(s => s.trim());
               const filtrados = resArr.filter(rItem => rItem && rItem !== 'QUICK_LETTER' && rItem !== 'REDACCION');
@@ -754,23 +1160,19 @@
               }
             }
             
-            // 2. To/Do
             if (resp.es_todo) {
               const statusTodo = resp.todo_revisado ? 'To/Do Revisado' : 'To/Do Pendiente';
               badgeTodo = `<span class="inline-block bg-slate-200 text-slate-800 font-bold border border-slate-300 px-1.5 py-0.5 rounded text-[10px]">${statusTodo}</span>`;
             }
 
-            // 3. Quick Lett
             if (resp.resultado && resp.resultado.includes('QUICK_LETTER')) {
               badgeQuickLett = `<span class="inline-block bg-orange-100 text-orange-800 font-bold border border-orange-300 px-1.5 py-0.5 rounded text-[10px]">Quick Lett</span>`;
             }
 
-            // 4. Opinión
             if (resp.es_opinion) {
               badgeOpinion = `<span class="inline-block bg-rose-100 text-rose-800 font-bold border border-rose-300 px-1.5 py-0.5 rounded text-[10px]">Opinión</span>`;
             }
 
-            // Unimos los badges exactamente en la secuencia requerida
             const badgesHTML = [badgeOpciones, badgeTodo, badgeQuickLett, badgeOpinion].filter(b => b !== '').join(' ');
 
             let badgeSocio = '';
@@ -786,7 +1188,6 @@
 
             const respTexto = resp.respuesta || resp.observaciones || '';
             
-            // Ordenamos también las cajas informativas internas
             let todoTexto = '';
             if (resp.es_todo) {
               todoTexto = `
