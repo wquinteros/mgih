@@ -26,6 +26,9 @@
         <button id="tab-historico-btn" onclick="cambiarPestana('historico')" class="px-3 py-1.5 text-xs font-bold rounded-lg text-indigo-100 hover:text-white transition">
           Histórico de Pregunta por Año
         </button>
+        <button id="tab-todo-btn" onclick="cambiarPestana('todo')" class="px-3 py-1.5 text-xs font-bold rounded-lg text-indigo-100 hover:text-white transition">
+          Resumen To/Do
+        </button>
         <button id="tab-quicklett-btn" onclick="cambiarPestana('quicklett')" class="px-3 py-1.5 text-xs font-bold rounded-lg text-indigo-100 hover:text-white transition">
           Resumen Quick Lett
         </button>
@@ -116,7 +119,21 @@
         </div>
       </div>
 
-      <!-- VISTA 3: Resumen Quick Lett (Acumulado) -->
+      <!-- VISTA 3: Resumen To/Do (Acumulado) -->
+      <div id="vista-todo" class="hidden space-y-3">
+        <div class="flex justify-between items-center mb-2">
+          <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-700">2. Acumulado de Pendientes To/Do (Todos los Aspectos)</h2>
+          <span id="contador-todo" class="text-xs font-bold text-slate-800 bg-slate-200 border border-slate-300 px-2.5 py-0.5 rounded-md">0 Pendientes</span>
+        </div>
+
+        <div id="contenedor-resumen-todo" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">
+            Selecciona un cliente arriba para ver el acumulado de To/Do.
+          </p>
+        </div>
+      </div>
+
+      <!-- VISTA 4: Resumen Quick Lett (Acumulado) -->
       <div id="vista-quicklett" class="hidden space-y-3">
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-[11px] font-bold uppercase tracking-wider text-orange-600">2. Acumulado de Hallazgos Quick Lett (Todos los Aspectos)</h2>
@@ -130,7 +147,7 @@
         </div>
       </div>
 
-      <!-- VISTA 4: Resumen Opinión (Acumulado) -->
+      <!-- VISTA 5: Resumen Opinión (Acumulado) -->
       <div id="vista-opinion" class="hidden space-y-3">
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-[11px] font-bold uppercase tracking-wider text-rose-600">2. Acumulado de Puntos para Opinión (Todos los Aspectos)</h2>
@@ -172,11 +189,13 @@
       
       const btnCaptura = document.getElementById('tab-captura-btn');
       const btnHistorico = document.getElementById('tab-historico-btn');
+      const btnTodo = document.getElementById('tab-todo-btn');
       const btnQuickLett = document.getElementById('tab-quicklett-btn');
       const btnOpinion = document.getElementById('tab-opinion-btn');
 
       const vistaCaptura = document.getElementById('vista-captura');
       const vistaHistorico = document.getElementById('vista-historico');
+      const vistaTodo = document.getElementById('vista-todo');
       const vistaQuickLett = document.getElementById('vista-quicklett');
       const vistaOpinion = document.getElementById('vista-opinion');
 
@@ -188,11 +207,13 @@
 
       btnCaptura.className = inactiveClass;
       btnHistorico.className = inactiveClass;
+      btnTodo.className = inactiveClass;
       btnQuickLett.className = inactiveClass;
       btnOpinion.className = inactiveClass;
 
       vistaCaptura.classList.add('hidden');
       vistaHistorico.classList.add('hidden');
+      vistaTodo.classList.add('hidden');
       vistaQuickLett.classList.add('hidden');
       vistaOpinion.classList.add('hidden');
 
@@ -206,6 +227,11 @@
         vistaHistorico.classList.remove('hidden');
         boxAnio.classList.add('hidden');
         boxAspecto.classList.remove('hidden');
+      } else if (modo === 'todo') {
+        btnTodo.className = activeClass;
+        vistaTodo.classList.remove('hidden');
+        boxAnio.classList.add('hidden');
+        boxAspecto.classList.add('hidden');
       } else if (modo === 'quicklett') {
         btnQuickLett.className = activeClass;
         vistaQuickLett.classList.remove('hidden');
@@ -226,6 +252,8 @@
         cargarPreguntas();
       } else if (pestanaActual === 'historico') {
         cargarHistoricoComparativo();
+      } else if (pestanaActual === 'todo') {
+        cargarResumenTodo();
       } else if (pestanaActual === 'quicklett') {
         cargarResumenQuickLett();
       } else if (pestanaActual === 'opinion') {
@@ -802,6 +830,66 @@
             </td>
             ${celdasAnios}
           </tr>
+        `;
+      });
+    }
+
+    async function cargarResumenTodo() {
+      const clienteIdVal = document.getElementById('select-cliente').value;
+      const contenedor = document.getElementById('contenedor-resumen-todo');
+      const contador = document.getElementById('contador-todo');
+
+      if (!clienteIdVal) {
+        contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">Selecciona un cliente arriba para ver el acumulado de To/Do.</p>';
+        contador.textContent = '0 Pendientes';
+        return;
+      }
+
+      contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-6">Cargando acumulado de pendientes To/Do...</p>';
+
+      const { data: respuestas, error } = await supabaseClient
+        .from('respuestas_auditoria')
+        .select('*')
+        .eq('cliente_id', clienteIdVal)
+        .eq('es_todo', true);
+
+      if (error || !respuestas || respuestas.length === 0) {
+        contenedor.innerHTML = '<div class="col-span-full p-4 bg-slate-50 text-slate-700 text-xs rounded-xl border border-slate-200 text-center font-medium">No existen tareas o pendientes To/Do registrados para este cliente.</div>';
+        contador.textContent = '0 Pendientes';
+        return;
+      }
+
+      contador.textContent = `${respuestas.length} Pendientes`;
+      contenedor.innerHTML = '';
+
+      const { data: preguntas } = await supabaseClient.from('preguntas_banco').select('*');
+
+      respuestas.forEach((r, idx) => {
+        const pregObj = preguntas ? preguntas.find(p => String(p.pregunta_id || p.id || p.id_pregunta) === String(r.pregunta_id)) : null;
+        const textoPreg = pregObj ? (pregObj.texto_pregunta || pregObj.pregunta || `Pregunta #${r.pregunta_id}`) : `Pregunta #${r.pregunta_id}`;
+
+        const statusBadge = r.todo_revisado 
+          ? '<span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded">✓ REVISADO</span>' 
+          : '<span class="text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded">PENDIENTE</span>';
+
+        contenedor.innerHTML += `
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 shadow-xs">
+            <div class="flex justify-between items-center">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold bg-slate-800 text-white px-2 py-0.5 rounded">To/Do #${idx + 1}</span>
+                <span class="text-xs font-bold text-slate-600">Año ${r.anio}</span>
+              </div>
+              ${statusBadge}
+            </div>
+            <p class="text-xs font-semibold text-slate-800">${textoPreg}</p>
+            <div class="p-2.5 bg-white rounded-lg border border-slate-200 text-xs text-slate-700 space-y-1.5">
+              <div><strong class="text-slate-900 block">Detalle del To/Do:</strong> <div class="whitespace-pre-wrap break-words">${r.detalle_todo || 'Sin detalle'}</div></div>
+              ${r.todo_visita ? `<div class="text-indigo-800 font-semibold"><strong>A Realizar en:</strong> ${r.todo_visita}</div>` : ''}
+              ${r.todo_asignado_email ? `<div><strong>Asignado a:</strong> ${r.todo_asignado_email}</div>` : ''}
+              ${r.todo_comentario_ejecutor ? `<div class="pt-1 border-t border-slate-100"><strong>Comentario Ejecutor:</strong> ${r.todo_comentario_ejecutor}</div>` : ''}
+              ${r.todo_revisado ? `<div class="pt-1 border-t border-slate-100 text-emerald-700 font-bold">✓ Revisado por: ${r.todo_reviso_email || 'N/A'}</div>` : ''}
+            </div>
+          </div>
         `;
       });
     }
