@@ -1208,7 +1208,12 @@
         resultadoVal = resultadoVal ? `${resultadoVal}, QUICK_LETTER` : 'QUICK_LETTER';
       }
 
-      const respVal = document.getElementById(`resp-${preguntaId}`).value;
+      // Si la pregunta tiene opciones, guardamos también las selecciones en "respuesta"
+      // para que aparezcan en el Histórico de Pregunta por Año.
+      // En "resultado" se conserva además QUICK_LETTER cuando corresponda.
+      const respVal = tieneOpciones
+        ? opcionesSeleccionadas.join(', ')
+        : document.getElementById(`resp-${preguntaId}`).value;
       const obsQLElem = document.getElementById(`ql-obs-text-${preguntaId}`);
       const obsQL = obsQLElem ? obsQLElem.value : '';
 
@@ -1338,8 +1343,18 @@
             ? todasLasRespuestas.find(r => String(r.pregunta_id) === String(preguntaId) && Number(r.anio) === a)
             : null;
 
-          // MODIFICACIÓN: Lee el campo 'respuesta' para desplegar la redacción libre guardada
-          const respTexto = resp ? (resp.respuesta || '') : '';
+          // El Histórico muestra primero 'respuesta'.
+          // Para registros antiguos, donde las selecciones solo quedaron en 'resultado',
+          // usamos 'resultado' como respaldo y excluimos marcas internas como QUICK_LETTER.
+          let respTexto = resp ? (resp.respuesta || '').trim() : '';
+
+          if (!respTexto && resp && resp.resultado) {
+            respTexto = String(resp.resultado)
+              .split(',')
+              .map(s => s.trim())
+              .filter(s => s && s !== 'QUICK_LETTER')
+              .join(', ');
+          }
           const hiddenStyle = visibilidadAnios[a] ? '' : 'style="display:none;"';
 
           celdasAnios += `
