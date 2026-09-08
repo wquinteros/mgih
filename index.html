@@ -9,7 +9,7 @@
   <!-- Lucide Icons para el Menú Lateral -->
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 font-sans flex">
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans flex relative">
 
   <!-- ==================== MENÚ LATERAL (SIDEBAR) ==================== -->
   <aside id="sidebar" class="w-64 bg-slate-900 text-slate-300 min-h-screen flex flex-col justify-between shrink-0 transition-all duration-300 shadow-xl z-20">
@@ -80,14 +80,9 @@
       </div>
 
       <!-- Formulario Crear/Editar Cliente -->
-      <form onsubmit="guardarNuevoCliente(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+      <form onsubmit="guardarNuevoCliente(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-4 gap-3">
         <input type="hidden" id="cli-editando-id" value="">
         
-        <div>
-          <button type="submit" id="btn-guardar-cli" class="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition shadow">
-            + Crear Cliente
-          </button>
-        </div>
         <div>
           <label class="block text-xs font-bold text-slate-600 mb-1">ID Cliente (cliente_id)</label>
           <input type="text" id="cli-id" required placeholder="Ej. CLI-001" class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
@@ -100,10 +95,15 @@
           <label class="block text-xs font-bold text-slate-600 mb-1">Nombre Completo</label>
           <input type="text" id="cli-nombre-completo" required placeholder="Ej. Corporación ABC S.A." class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
         </div>
-        <div id="box-cancelar-edicion" class="hidden">
-          <button type="button" onclick="cancelarEdicionCliente()" class="w-full py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-300 transition">
-            Cancelar Edición
+        <div class="flex items-end gap-2">
+          <button type="submit" id="btn-guardar-cli" class="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition shadow">
+            + Crear Cliente
           </button>
+          <div id="box-cancelar-edicion" class="hidden w-full">
+            <button type="button" onclick="cancelarEdicionCliente()" class="w-full py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-300 transition">
+              Cancelar
+            </button>
+          </div>
         </div>
       </form>
 
@@ -134,8 +134,8 @@
         </div>
       </div>
 
-      <!-- Formulario Crear Usuario -->
-      <form onsubmit="guardarNuevoUsuario(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-4 gap-3">
+      <!-- Formulario Crear Usuario Alineado -->
+      <form onsubmit="guardarNuevoUsuario(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-5 gap-3">
         <div>
           <label class="block text-xs font-bold text-slate-600 mb-1">Nombre Completo</label>
           <input type="text" id="usr-nombre" required placeholder="Ej. Juan Pérez" class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
@@ -146,14 +146,22 @@
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-600 mb-1">Rol</label>
-          <select id="usr-rol" class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-            <option value="Auditor Senior">Auditor Senior</option>
-            <option value="Auditor Junior">Auditor Junior</option>
+          <select id="usr-rol" required class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+            <option value="Auditor" selected>Auditor</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Cargo</label>
+          <select id="usr-cargo" required class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
             <option value="Socio">Socio</option>
+            <option value="Supervisor">Supervisor</option>
+            <option value="Senior">Senior</option>
+            <option value="SemiSenior">SemiSenior</option>
+            <option value="Auditor">Auditor</option>
           </select>
         </div>
         <div class="flex items-end">
-          <button type="submit" class="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition">
+          <button type="submit" class="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition shadow">
             + Crear Auditor
           </button>
         </div>
@@ -164,10 +172,10 @@
         <table class="w-full text-left text-xs text-slate-700">
           <thead class="bg-slate-100 uppercase text-[10px] font-bold text-slate-600 border-b">
             <tr>
-              <th class="p-3">ID</th>
               <th class="p-3">Nombre</th>
               <th class="p-3">Email</th>
               <th class="p-3">Rol</th>
+              <th class="p-3">Cargo</th>
             </tr>
           </thead>
           <tbody id="tabla-usuarios-body" class="divide-y divide-slate-200">
@@ -240,24 +248,50 @@
           </div>
         </div>
 
-        <!-- VISTA 1: Cuestionario -->
-        <div id="vista-captura">
-          <div class="flex justify-between items-center mb-3">
-            <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">2. Cuestionario de Evaluación</h2>
+        <!-- VISTA 1: Cuestionario / Captura por Año en Estructura de Tabla -->
+        <div id="vista-captura" class="space-y-3">
+          <div class="flex justify-between items-center mb-1">
+            <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">2. Cuestionario de Evaluación (Captura de Respuestas)</h2>
             <span id="contador-preguntas" class="text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-md">0 Preguntas</span>
           </div>
 
-          <div id="contenedor-preguntas" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">
-              Selecciona un cliente, año y un aspecto arriba para cargar el cuestionario.
-            </p>
+          <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm bg-white">
+            <table class="w-full text-left text-xs text-slate-700 border-collapse">
+              <thead class="bg-slate-100 text-slate-600 uppercase text-[10px] font-bold border-b border-slate-200">
+                <tr>
+                  <th class="p-3 w-1/4 border-r border-slate-200 min-w-[180px]">Pregunta / Criterio</th>
+                  <th class="p-3 text-center border-r border-slate-200 w-44 shrink-0">Evaluaciones / Marcas</th>
+                  <th class="p-3 text-left w-full min-w-[400px]">Respuesta del Año</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-captura-body" class="divide-y divide-slate-200">
+                <tr>
+                  <td colspan="3" class="p-8 text-center text-slate-400">
+                    Selecciona un cliente, año y un aspecto arriba para cargar el cuestionario de captura.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
         <!-- VISTA 2: Histórico -->
         <div id="vista-historico" class="hidden space-y-3">
-          <div class="flex justify-between items-center mb-2">
-            <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">2. Comparativa Histórica Pregunta por Pregunta (Multianual)</h2>
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
+            <div>
+              <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-500">2. Visor Histórico Pregunta por Pregunta (Multianual)</h2>
+              <p class="text-[11px] text-slate-500">Vista de solo lectura para consultar respuestas históricas de cada año.</p>
+            </div>
+            
+            <!-- Selector de Visibilidad de Columnas / Años -->
+            <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+              <span class="text-[10px] font-bold text-slate-500 uppercase px-1">Ver Años:</span>
+              <button onclick="toggleColumnaAnio(2024)" id="btn-col-2024" class="px-2 py-0.5 text-[10px] font-bold rounded border bg-amber-500 text-white border-amber-600">2024</button>
+              <button onclick="toggleColumnaAnio(2025)" id="btn-col-2025" class="px-2 py-0.5 text-[10px] font-bold rounded border bg-indigo-600 text-white border-indigo-700">2025</button>
+              <button onclick="toggleColumnaAnio(2026)" id="btn-col-2026" class="px-2 py-0.5 text-[10px] font-bold rounded border bg-slate-900 text-white border-slate-950">2026</button>
+              <button onclick="toggleColumnaAnio(2027)" id="btn-col-2027" class="px-2 py-0.5 text-[10px] font-bold rounded border bg-purple-600 text-white border-purple-700">2027</button>
+            </div>
+
             <span id="contador-historico" class="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md">0 Preguntas</span>
           </div>
 
@@ -265,11 +299,11 @@
             <table class="w-full text-left text-xs text-slate-700 border-collapse">
               <thead class="bg-slate-100 text-slate-600 uppercase text-[10px] font-bold border-b border-slate-200">
                 <tr>
-                  <th class="p-3 w-1/4 border-r border-slate-200 min-w-[220px]">Pregunta / Criterio</th>
-                  <th class="p-3 w-1/4 text-center border-r border-slate-200 min-w-[180px] bg-amber-50">2024</th>
-                  <th class="p-3 w-1/4 text-center border-r border-slate-200 min-w-[180px] bg-indigo-50">2025</th>
-                  <th class="p-3 w-1/4 text-center border-r border-slate-200 min-w-[180px] bg-slate-900 text-white">2026</th>
-                  <th class="p-3 w-1/4 text-center min-w-[180px] bg-purple-50">2027</th>
+                  <th class="p-3 w-1/5 border-r border-slate-200 min-w-[220px]">Pregunta / Criterio</th>
+                  <th id="th-col-2024" class="p-3 w-1/5 text-center border-r border-slate-200 min-w-[260px] bg-amber-50">2024</th>
+                  <th id="th-col-2025" class="p-3 w-1/5 text-center border-r border-slate-200 min-w-[260px] bg-indigo-50">2025</th>
+                  <th id="th-col-2026" class="p-3 w-1/5 text-center border-r border-slate-200 min-w-[260px] bg-slate-900 text-white">2026</th>
+                  <th id="th-col-2027" class="p-3 w-1/5 text-center min-w-[260px] bg-purple-50">2027</th>
                 </tr>
               </thead>
               <tbody id="tabla-historico-body" class="divide-y divide-slate-200">
@@ -392,6 +426,135 @@
 
   </main>
 
+  <!-- ==================== MODALES FLOTANTES PARA EVALUACIÓN ==================== -->
+
+  <!-- MODAL TO/DO -->
+  <div id="modal-todo" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+      <div class="flex justify-between items-center border-b pb-2">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-slate-800"></span>
+          <h3 class="text-sm font-bold text-slate-800">Gestión de Tarea To/Do</h3>
+        </div>
+        <button onclick="cerrarModal('modal-todo')" class="text-slate-400 hover:text-slate-600 font-bold text-sm">✕</button>
+      </div>
+
+      <input type="hidden" id="modal-todo-pregunta-id" value="">
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Detalle To/Do</label>
+          <textarea id="modal-todo-text" rows="3" placeholder="Detalle de lo que está pendiente..." class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-500 bg-white leading-relaxed"></textarea>
+        </div>
+
+        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+          <label class="block text-[11px] font-bold text-indigo-700 mb-1">A Realizar To/Do</label>
+          <div class="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-700">
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="checkbox" id="modal-todo-visita-preliminar" class="rounded text-indigo-600 focus:ring-indigo-500">
+              <span>Visita Preliminar</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="checkbox" id="modal-todo-visita-final" class="rounded text-indigo-600 focus:ring-indigo-500">
+              <span>Visita Final</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Asignado - email</label>
+          <input type="email" id="modal-todo-email" placeholder="ejemplo@correo.com" class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-500 bg-white">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Comentario Ejecutor</label>
+          <textarea id="modal-todo-comentario-ejecutor" rows="2" placeholder="Comentario o avance del ejecutor..." class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-500 bg-white leading-relaxed"></textarea>
+        </div>
+
+        <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="modal-todo-revisado" class="w-4 h-4 text-slate-700 border-slate-300 rounded focus:ring-slate-500">
+            <label for="modal-todo-revisado" class="text-xs font-bold text-slate-700">To/Do Revisado</label>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Email de quien revisó</label>
+            <input type="email" id="modal-todo-reviso-email" placeholder="revisor@correo.com" class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-500 bg-white">
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t">
+        <button onclick="desactivarModuloModal('todo')" class="px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-lg transition">Desactivar To/Do</button>
+        <button onclick="guardarModalTodo()" class="px-4 py-1.5 bg-slate-800 text-white font-bold rounded-lg text-xs hover:bg-slate-900 transition">Confirmar y Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL QUICK LETT -->
+  <div id="modal-quicklett" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+      <div class="flex justify-between items-center border-b pb-2">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-orange-500"></span>
+          <h3 class="text-sm font-bold text-orange-900">Hallazgo Quick Lett</h3>
+        </div>
+        <button onclick="cerrarModal('modal-quicklett')" class="text-slate-400 hover:text-slate-600 font-bold text-sm">✕</button>
+      </div>
+
+      <input type="hidden" id="modal-ql-pregunta-id" value="">
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-orange-900 uppercase mb-1">Detalle del Hallazgo (Quick Lett)</label>
+          <textarea id="modal-ql-text" rows="4" placeholder="Escribe el detalle del hallazgo para Quick Lett..." class="w-full p-2.5 border border-orange-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-orange-500 bg-white leading-relaxed"></textarea>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t">
+        <button onclick="desactivarModuloModal('ql')" class="px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-lg transition">Desactivar Quick Lett</button>
+        <button onclick="guardarModalQL()" class="px-4 py-1.5 bg-orange-500 text-white font-bold rounded-lg text-xs hover:bg-orange-600 transition">Confirmar y Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL OPINIÓN -->
+  <div id="modal-opinion" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+      <div class="flex justify-between items-center border-b pb-2">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-rose-600"></span>
+          <h3 class="text-sm font-bold text-rose-900">Punto para Opinión de Auditoría</h3>
+        </div>
+        <button onclick="cerrarModal('modal-opinion')" class="text-slate-400 hover:text-slate-600 font-bold text-sm">✕</button>
+      </div>
+
+      <input type="hidden" id="modal-op-pregunta-id" value="">
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-rose-900 uppercase mb-1">Argumento para Opinión</label>
+          <textarea id="modal-op-text" rows="3" placeholder="Escribe el argumento para la opinión..." class="w-full p-2.5 border border-rose-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-rose-500 bg-white leading-relaxed"></textarea>
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
+          <label class="block text-[10px] font-bold text-slate-600 uppercase">Decisión Final (Socio)</label>
+          <select id="modal-socio-sel" class="w-full p-2 bg-white border border-slate-300 font-semibold text-xs rounded-lg outline-none focus:ring-2 focus:ring-rose-500">
+            <option value="PENDIENTE">Pendiente de Revisión</option>
+            <option value="VA_OPINION">SI VA a la Opinión Final</option>
+            <option value="NO_VA">NO VA (Desestimado / Corregido)</option>
+          </select>
+          <textarea id="modal-socio-comment" rows="2" placeholder="Comentario sobre decisión final..." class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-rose-500 bg-white leading-relaxed"></textarea>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t">
+        <button onclick="desactivarModuloModal('op')" class="px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-lg transition">Desactivar Opinión</button>
+        <button onclick="guardarModalOpinion()" class="px-4 py-1.5 bg-rose-600 text-white font-bold rounded-lg text-xs hover:bg-rose-700 transition">Confirmar y Guardar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SUPABASE_URL = 'https://yyjeqklvrhezprrkdfof.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5amVxa2x2cmhlenBycmtkZm9mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzNTcxNDIsImV4cCI6MjEwMDkzMzE0Mn0.Jzgfkcay8wYUXxt38ZmPJ3rG3HhZmWp01OYAQamPeOE';
@@ -400,6 +563,14 @@
 
     let pestanaActual = 'captura';
     let listaClientesCache = [];
+    
+    // Estado de visibilidad de las columnas por año en el histórico
+    const visibilidadAnios = {
+      2024: true,
+      2025: true,
+      2026: true,
+      2027: true
+    };
 
     document.addEventListener("DOMContentLoaded", function() {
       lucide.createIcons();
@@ -431,13 +602,12 @@
       }
     }
 
-    // GESTIÓN DE CLIENTES (CREAR Y EDITAR)
+    // GESTIÓN DE CLIENTES
     async function cargarClientes() {
       const select = document.getElementById('select-cliente');
       const selectVis = document.getElementById('vis-cliente');
       const tbody = document.getElementById('tabla-clientes-body');
       
-      // ORDENAMIENTO ALFABÉTICO AUTOMÁTICO POR NOMBRE_CORTO
       const { data: clientes, error } = await supabaseClient
         .from('clientes')
         .select('*')
@@ -493,7 +663,7 @@
 
       document.getElementById('cli-editando-id').value = clienteId;
       document.getElementById('cli-id').value = cliente.cliente_id || cliente.id;
-      document.getElementById('cli-id').readOnly = true; // No modificar llave primaria al editar
+      document.getElementById('cli-id').readOnly = true;
       document.getElementById('cli-id').classList.add('bg-slate-100');
 
       document.getElementById('cli-nombre-corto').value = cliente.nombre_corto || '';
@@ -530,7 +700,6 @@
       const nombre_completo = document.getElementById('cli-nombre-completo').value.trim();
 
       if (editandoId) {
-        // Modo Edición (UPDATE)
         const { error } = await supabaseClient
           .from('clientes')
           .update({ nombre_corto, nombre_completo })
@@ -544,7 +713,6 @@
           cargarClientes();
         }
       } else {
-        // VERIFICACIÓN DE CLIENTE_ID DUPLICADO ANTES DE CREAR
         const { data: existente } = await supabaseClient
           .from('clientes')
           .select('cliente_id')
@@ -552,11 +720,10 @@
           .maybeSingle();
 
         if (existente) {
-          alert(`El ID de cliente "${cliente_id}" ya está registrado. Por favor, utiliza un ID diferente.`);
+          alert(`El ID de cliente "${cliente_id}" ya está registrado.`);
           return;
         }
 
-        // Modo Inserción (INSERT)
         const { error } = await supabaseClient.from('clientes').insert([
           { cliente_id, nombre_corto, nombre_completo }
         ]);
@@ -587,19 +754,22 @@
 
       if (usuarios && usuarios.length > 0) {
         usuarios.forEach(u => {
-          const uid = u.usuario_id || u.id;
-          const nombre = u.nombre || u.nombre_completo || 'Sin Nombre';
+          const uid = u.id || u.usuario_id;
+          const nombreVal = u.nombre || u.nombre_completo || '-';
+          const emailVal = u.email || u.correo || '-';
+          const rolVal = u.rol || 'Auditor';
+          const cargoVal = u.cargo || '-';
           
           tbody.innerHTML += `
             <tr class="hover:bg-slate-50">
-              <td class="p-3 border-b">${uid}</td>
-              <td class="p-3 border-b font-semibold">${nombre}</td>
-              <td class="p-3 border-b">${u.email || u.correo || '-'}</td>
-              <td class="p-3 border-b"><span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[10px] font-bold">${u.rol || 'Auditor'}</span></td>
+              <td class="p-3 border-b font-semibold text-slate-800">${nombreVal}</td>
+              <td class="p-3 border-b text-slate-600">${emailVal}</td>
+              <td class="p-3 border-b"><span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[10px] font-bold border border-indigo-100">${rolVal}</span></td>
+              <td class="p-3 border-b font-medium text-slate-700">${cargoVal}</td>
             </tr>
           `;
 
-          if (selectVis) selectVis.innerHTML += `<option value="${uid}">${nombre}</option>`;
+          if (selectVis) selectVis.innerHTML += `<option value="${uid}">${nombreVal}</option>`;
         });
       } else {
         tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">No hay usuarios registrados.</td></tr>';
@@ -608,14 +778,19 @@
 
     async function guardarNuevoUsuario(e) {
       e.preventDefault();
-      const nombre = document.getElementById('usr-nombre').value;
-      const email = document.getElementById('usr-email').value;
+      const nombre = document.getElementById('usr-nombre').value.trim();
+      const email = document.getElementById('usr-email').value.trim();
       const rol = document.getElementById('usr-rol').value;
+      const cargo = document.getElementById('usr-cargo').value;
 
-      const { error } = await supabaseClient.from('usuarios').insert([{ nombre, email, rol }]);
-      if (error) alert("Error al crear usuario: " + error.message);
-      else {
-        alert("¡Usuario creado exitosamente!");
+      const { error } = await supabaseClient.from('usuarios').insert([
+        { nombre, email, rol, cargo }
+      ]);
+
+      if (error) {
+        alert("Error al crear usuario: " + error.message);
+      } else {
+        alert("¡Auditor creado exitosamente!");
         document.getElementById('usr-nombre').value = '';
         document.getElementById('usr-email').value = '';
         cargarUsuariosTabla();
@@ -627,7 +802,7 @@
 
     function guardarVisita(e) {
       e.preventDefault();
-      alert("Visita agendada (puedes enlazar la tabla 'visitas' en Supabase).");
+      alert("Visita agendada.");
     }
 
     // LÓGICA DE AUDITORÍA
@@ -730,59 +905,108 @@
       }
     }
 
-    function toggleTodo(preguntaId) {
-      const btn = document.getElementById(`btn-todo-${preguntaId}`);
-      const hiddenVal = document.getElementById(`todo-val-${preguntaId}`);
-      const panelFields = document.getElementById(`panel-todo-fields-${preguntaId}`);
+    // MODALES FLOTANTES MANEJO
+    function abrirModal(modalId) {
+      document.getElementById(modalId).classList.remove('hidden');
+    }
 
-      if (hiddenVal.value === 'SI') {
-        hiddenVal.value = 'NO';
+    function cerrarModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    function abrirModalTodo(preguntaId) {
+      document.getElementById('modal-todo-pregunta-id').value = preguntaId;
+      document.getElementById('modal-todo-text').value = document.getElementById(`todo-text-${preguntaId}`).value;
+      document.getElementById('modal-todo-visita-preliminar').checked = document.getElementById(`todo-visita-preliminar-${preguntaId}`).checked;
+      document.getElementById('modal-todo-visita-final').checked = document.getElementById(`todo-visita-final-${preguntaId}`).checked;
+      document.getElementById('modal-todo-email').value = document.getElementById(`todo-email-${preguntaId}`).value;
+      document.getElementById('modal-todo-comentario-ejecutor').value = document.getElementById(`todo-comentario-ejecutor-${preguntaId}`).value;
+      document.getElementById('modal-todo-revisado').checked = document.getElementById(`todo-revisado-${preguntaId}`).checked;
+      document.getElementById('modal-todo-reviso-email').value = document.getElementById(`todo-reviso-email-${preguntaId}`).value;
+      
+      abrirModal('modal-todo');
+    }
+
+    function guardarModalTodo() {
+      const pId = document.getElementById('modal-todo-pregunta-id').value;
+      document.getElementById(`todo-text-${pId}`).value = document.getElementById('modal-todo-text').value;
+      document.getElementById(`todo-visita-preliminar-${pId}`).checked = document.getElementById('modal-todo-visita-preliminar').checked;
+      document.getElementById(`todo-visita-final-${pId}`).checked = document.getElementById('modal-todo-visita-final').checked;
+      document.getElementById(`todo-email-${pId}`).value = document.getElementById('modal-todo-email').value;
+      document.getElementById(`todo-comentario-ejecutor-${pId}`).value = document.getElementById('modal-todo-comentario-ejecutor').value;
+      document.getElementById(`todo-revisado-${pId}`).checked = document.getElementById('modal-todo-revisado').checked;
+      document.getElementById(`todo-reviso-email-${pId}`).value = document.getElementById('modal-todo-reviso-email').value;
+
+      document.getElementById(`todo-val-${pId}`).value = 'SI';
+      const btn = document.getElementById(`btn-todo-${pId}`);
+      btn.textContent = '✓ To/Do';
+      btn.className = 'w-full py-1.5 px-2 text-[10px] font-bold rounded-lg transition shadow-xs flex items-center justify-center bg-slate-800 text-white border border-slate-900';
+
+      cerrarModal('modal-todo');
+    }
+
+    function abrirModalQL(preguntaId) {
+      document.getElementById('modal-ql-pregunta-id').value = preguntaId;
+      document.getElementById('modal-ql-text').value = document.getElementById(`ql-obs-text-${preguntaId}`).value;
+      abrirModal('modal-quicklett');
+    }
+
+    function guardarModalQL() {
+      const pId = document.getElementById('modal-ql-pregunta-id').value;
+      document.getElementById(`ql-obs-text-${pId}`).value = document.getElementById('modal-ql-text').value;
+
+      document.getElementById(`ql-val-${pId}`).value = 'SI';
+      const btn = document.getElementById(`btn-ql-${pId}`);
+      btn.textContent = '✓ Quick Lett';
+      btn.className = 'w-full py-1.5 px-2 text-[10px] font-bold rounded-lg transition shadow-xs flex items-center justify-center bg-orange-500 text-white border border-orange-600';
+
+      cerrarModal('modal-quicklett');
+    }
+
+    function abrirModalOpinion(preguntaId) {
+      document.getElementById('modal-op-pregunta-id').value = preguntaId;
+      document.getElementById('modal-op-text').value = document.getElementById(`op-text-input-${preguntaId}`).value;
+      document.getElementById('modal-socio-sel').value = document.getElementById(`socio-sel-${preguntaId}`).value;
+      document.getElementById('modal-socio-comment').value = document.getElementById(`socio-comment-${preguntaId}`).value;
+      abrirModal('modal-opinion');
+    }
+
+    function guardarModalOpinion() {
+      const pId = document.getElementById('modal-op-pregunta-id').value;
+      document.getElementById(`op-text-input-${pId}`).value = document.getElementById('modal-op-text').value;
+      document.getElementById(`socio-sel-${pId}`).value = document.getElementById('modal-socio-sel').value;
+      document.getElementById(`socio-comment-${pId}`).value = document.getElementById('modal-socio-comment').value;
+
+      document.getElementById(`op-val-${pId}`).value = 'SI';
+      const btn = document.getElementById(`btn-op-${pId}`);
+      btn.textContent = '✓ Opinión';
+      btn.className = 'w-full py-1.5 px-2 text-[10px] font-bold rounded-lg transition shadow-xs flex items-center justify-center bg-rose-600 text-white border border-rose-700';
+
+      cerrarModal('modal-opinion');
+    }
+
+    function desactivarModuloModal(tipo) {
+      if (tipo === 'todo') {
+        const pId = document.getElementById('modal-todo-pregunta-id').value;
+        document.getElementById(`todo-val-${pId}`).value = 'NO';
+        const btn = document.getElementById(`btn-todo-${pId}`);
         btn.textContent = 'To/Do';
-        btn.className = 'w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center bg-slate-200 text-slate-800 border border-slate-300 hover:bg-slate-700 hover:text-white';
-        panelFields.classList.add('hidden');
-        panelFields.classList.remove('block');
-      } else {
-        hiddenVal.value = 'SI';
-        btn.textContent = '✓ To/Do';
-        btn.className = 'w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center bg-slate-700 text-white border border-slate-800';
-        panelFields.classList.remove('hidden');
-        panelFields.classList.add('block');
-      }
-    }
-
-    function marcarQuickLetter(preguntaId) {
-      const btn = document.getElementById(`btn-ql-${preguntaId}`);
-      const hiddenVal = document.getElementById(`ql-val-${preguntaId}`);
-      const obsArea = document.getElementById(`ql-obs-${preguntaId}`);
-
-      if (hiddenVal.value === 'SI') {
-        hiddenVal.value = 'NO';
+        btn.className = 'w-full py-1.5 px-2 text-[10px] font-bold rounded-lg transition shadow-xs flex items-center justify-center bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-700 hover:text-white';
+        cerrarModal('modal-todo');
+      } else if (tipo === 'ql') {
+        const pId = document.getElementById('modal-ql-pregunta-id').value;
+        document.getElementById(`ql-val-${pId}`).value = 'NO';
+        const btn = document.getElementById(`btn-ql-${pId}`);
         btn.textContent = 'Quick Lett';
-        btn.className = 'w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center bg-orange-100 text-orange-800 border border-orange-300 hover:bg-orange-500 hover:text-white';
-        obsArea.classList.add('hidden');
-      } else {
-        hiddenVal.value = 'SI';
-        btn.textContent = '✓ Quick Lett';
-        btn.className = 'w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center bg-orange-500 text-white border border-orange-600';
-        obsArea.classList.remove('hidden');
-      }
-    }
-
-    function toggleOpinion(preguntaId) {
-      const btn = document.getElementById(`btn-op-${preguntaId}`);
-      const hiddenVal = document.getElementById(`op-val-${preguntaId}`);
-      const textArea = document.getElementById(`op-text-${preguntaId}`);
-
-      if (hiddenVal.value === 'SI') {
-        hiddenVal.value = 'NO';
+        btn.className = 'w-full py-1.5 px-2 text-[10px] font-bold rounded-lg transition shadow-xs flex items-center justify-center bg-orange-50 text-orange-800 border border-orange-200 hover:bg-orange-500 hover:text-white';
+        cerrarModal('modal-quicklett');
+      } else if (tipo === 'op') {
+        const pId = document.getElementById('modal-op-pregunta-id').value;
+        document.getElementById(`op-val-${pId}`).value = 'NO';
+        const btn = document.getElementById(`btn-op-${pId}`);
         btn.textContent = 'Opinión';
-        btn.className = 'w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-600 hover:text-white';
-        textArea.classList.add('hidden');
-      } else {
-        hiddenVal.value = 'SI';
-        btn.textContent = '✓ Opinión';
-        btn.className = 'w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center bg-rose-600 text-white border border-rose-700';
-        textArea.classList.remove('hidden');
+        btn.className = 'w-full py-1.5 px-2 text-[10px] font-bold rounded-lg transition shadow-xs flex items-center justify-center bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-600 hover:text-white';
+        cerrarModal('modal-opinion');
       }
     }
 
@@ -791,16 +1015,16 @@
       const anioVal = document.getElementById('select-anio').value;
       const aspectoIdVal = document.getElementById('select-aspecto').value;
       
-      const contenedor = document.getElementById('contenedor-preguntas');
+      const tbody = document.getElementById('tabla-captura-body');
       const contador = document.getElementById('contador-preguntas');
 
       if (!aspectoIdVal || !clienteIdVal) {
-        contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-8 border border-dashed border-slate-300 rounded-xl">Selecciona un cliente y un aspecto arriba para cargar los datos.</p>';
+        tbody.innerHTML = '<tr><td colspan="3" class="p-8 text-center text-slate-400">Selecciona un cliente, año y un aspecto arriba para cargar el cuestionario.</td></tr>';
         contador.textContent = '0 Preguntas';
         return;
       }
 
-      contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-6">Cargando preguntas y respuestas del año ' + anioVal + '...</p>';
+      tbody.innerHTML = '<tr><td colspan="3" class="p-8 text-center text-slate-500">Cargando preguntas y respuestas del año ' + anioVal + '...</td></tr>';
 
       let { data: preguntas, error } = await supabaseClient
         .from('preguntas_banco')
@@ -808,7 +1032,7 @@
         .eq('id_aspecto', aspectoIdVal);
 
       if (error || !preguntas || preguntas.length === 0) {
-        contenedor.innerHTML = `<div class="col-span-full p-3 bg-amber-50 text-amber-800 text-xs rounded-xl border border-amber-200">No se encontraron preguntas para este aspecto.</div>`;
+        tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-amber-700 bg-amber-50">No se encontraron preguntas para este aspecto.</td></tr>`;
         contador.textContent = '0 Preguntas';
         return;
       }
@@ -822,7 +1046,7 @@
         .eq('anio', Number(anioVal));
 
       contador.textContent = `${preguntas.length} Preguntas`;
-      contenedor.innerHTML = '';
+      tbody.innerHTML = '';
 
       preguntas.forEach((p, idx) => {
         const preguntaId = p.pregunta_id || p.id || p.id_pregunta;
@@ -844,8 +1068,8 @@
         const valTodoText = respExistente ? (respExistente.detalle_todo || '') : '';
         
         const valTodoVisita = respExistente ? (respExistente.todo_visita || '') : '';
-        const chkPreliminar = valTodoVisita.includes('Visita Preliminar') ? 'checked' : '';
-        const chkFinal = valTodoVisita.includes('Visita Final') ? 'checked' : '';
+        const chkPreliminar = valTodoVisita.includes('Visita Preliminar');
+        const chkFinal = valTodoVisita.includes('Visita Final');
 
         const valTodoAsignadoEmail = respExistente ? (respExistente.todo_asignado_email || '') : '';
         const valTodoComentarioEjecutor = respExistente ? (respExistente.todo_comentario_ejecutor || '') : '';
@@ -861,7 +1085,7 @@
         let htmlSeleccion = '';
         if (tieneOpciones) {
           let opcionesCheckboxes = '';
-          opcionesPregunta.forEach((op, opIdx) => {
+          opcionesPregunta.forEach((op) => {
             const textoOp = op.texto_opcion || op.opcion || `Opción #${op.id_opcion || op.opcion_id}`;
             const isChecked = resultadosSeleccionados.includes(textoOp) ? 'checked' : '';
             opcionesCheckboxes += `
@@ -874,143 +1098,89 @@
 
           htmlSeleccion = `
             <div class="mb-2">
-              <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Opciones Seleccionables (Puedes marcar varias)</label>
-              <div class="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto p-1 bg-white border border-slate-200 rounded-lg">
+              <label class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Opciones Seleccionables</label>
+              <div class="grid grid-cols-1 gap-1 max-h-36 overflow-y-auto p-1 bg-white border border-slate-200 rounded-lg">
                 ${opcionesCheckboxes}
               </div>
             </div>
           `;
         }
 
-        contenedor.innerHTML += `
-          <div class="p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-indigo-300 transition flex flex-col justify-between">
-            
-            <div class="mb-3 border-b border-slate-100 pb-2">
-              <div class="flex justify-between items-center mb-1.5">
-                <span class="text-[10px] font-bold bg-slate-900 text-white px-2 py-0.5 rounded-md">
-                  Pregunta #${idx + 1}
-                </span>
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-50/80 transition">
+            <!-- 1. Criterio / Pregunta -->
+            <td class="p-3 border-r border-slate-200 align-top bg-white">
+              <div class="flex items-center gap-1.5 mb-1.5">
+                <span class="text-[10px] font-bold bg-slate-900 text-white px-2 py-0.5 rounded-md">#${idx + 1}</span>
                 <span class="text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-md">Año ${anioVal}</span>
               </div>
-              <p class="text-xs sm:text-sm font-semibold text-slate-800 leading-snug">${textoPregunta}</p>
-            </div>
+              <p class="font-semibold text-slate-800 leading-snug text-xs sm:text-sm">${textoPregunta}</p>
+            </td>
 
-            <div class="grid grid-cols-12 gap-3 items-start">
-              <div class="col-span-12 sm:col-span-3 lg:col-span-2 flex flex-col gap-1.5 min-w-[85px]">
-                
-                <button onclick="toggleTodo('${preguntaId}')" id="btn-todo-${preguntaId}" 
-                        class="w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center whitespace-nowrap ${
+            <!-- 2. Casilleros / Botones Flotantes y Acción de Guardar -->
+            <td class="p-3 border-r border-slate-200 align-top bg-slate-50/50">
+              <div class="flex flex-col gap-2">
+                <button onclick="abrirModalTodo('${preguntaId}')" id="btn-todo-${preguntaId}" 
+                        class="w-full py-1.5 px-2 text-[10px] font-bold rounded-lg transition shadow-xs flex items-center justify-center whitespace-nowrap ${
                           esTodo === 'SI' 
-                          ? 'bg-slate-700 text-white border border-slate-800' 
-                          : 'bg-slate-200 text-slate-800 border border-slate-300 hover:bg-slate-700 hover:text-white'
+                          ? 'bg-slate-800 text-white border border-slate-900' 
+                          : 'bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-700 hover:text-white'
                         }">
                   ${esTodo === 'SI' ? '✓ To/Do' : 'To/Do'}
                 </button>
                 <input type="hidden" id="todo-val-${preguntaId}" value="${esTodo}">
 
-                <button onclick="marcarQuickLetter('${preguntaId}')" id="btn-ql-${preguntaId}" 
-                        class="w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center whitespace-nowrap ${
+                <button onclick="abrirModalQL('${preguntaId}')" id="btn-ql-${preguntaId}" 
+                        class="w-full py-1.5 px-2 text-[10px] font-bold rounded-lg transition shadow-xs flex items-center justify-center whitespace-nowrap ${
                           esQL === 'SI' 
                           ? 'bg-orange-500 text-white border border-orange-600' 
-                          : 'bg-orange-100 text-orange-800 border border-orange-300 hover:bg-orange-500 hover:text-white'
+                          : 'bg-orange-50 text-orange-800 border border-orange-200 hover:bg-orange-500 hover:text-white'
                         }">
                   ${esQL === 'SI' ? '✓ Quick Lett' : 'Quick Lett'}
                 </button>
                 <input type="hidden" id="ql-val-${preguntaId}" value="${esQL}">
 
-                <button onclick="toggleOpinion('${preguntaId}')" id="btn-op-${preguntaId}" 
-                        class="w-full py-1 px-1 text-[10px] font-bold rounded transition shadow-xs flex items-center justify-center whitespace-nowrap ${
+                <button onclick="abrirModalOpinion('${preguntaId}')" id="btn-op-${preguntaId}" 
+                        class="w-full py-1.5 px-2 text-[10px] font-bold rounded-lg transition shadow-xs flex items-center justify-center whitespace-nowrap ${
                           esOpinion === 'SI' 
                           ? 'bg-rose-600 text-white border border-rose-700' 
-                          : 'bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-600 hover:text-white'
+                          : 'bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-600 hover:text-white'
                         }">
                   ${esOpinion === 'SI' ? '✓ Opinión' : 'Opinión'}
                 </button>
                 <input type="hidden" id="op-val-${preguntaId}" value="${esOpinion}">
 
+                <!-- Botón de Guardar en la misma columna abajo -->
+                <button onclick="guardarPreguntaCompleta('${preguntaId}', ${tieneOpciones})" class="w-full mt-2 py-2 px-2 text-xs font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition shadow">
+                  Guardar ${anioVal}
+                </button>
               </div>
 
-              <div class="col-span-12 sm:col-span-9 lg:col-span-10 space-y-3 w-full">
-                ${htmlSeleccion}
-
-                <div class="w-full">
-                  <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Respuesta Detallada (${anioVal})</label>
-                  <textarea id="resp-${preguntaId}" rows="3" placeholder="Escribe la respuesta detallada..." class="w-full p-2.5 border border-slate-300 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50/50 focus:bg-white leading-relaxed whitespace-pre-wrap break-words">${valRespuestaText}</textarea>
-                </div>
-
-                <div id="ql-obs-${preguntaId}" class="${esQL === 'SI' ? 'block' : 'hidden'} p-2 bg-orange-50 rounded-lg border border-orange-200 w-full">
-                  <label class="block text-[10px] font-bold text-orange-900 uppercase mb-1">Detalle del Hallazgo (Quick Lett)</label>
-                  <textarea id="ql-obs-text-${preguntaId}" rows="2" placeholder="Escribe el detalle del hallazgo para Quick Lett..." class="w-full p-2 border border-orange-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-orange-500 bg-white leading-tight whitespace-pre-wrap break-words">${valObservacionQL}</textarea>
-                </div>
-
-                <div id="op-text-${preguntaId}" class="${esOpinion === 'SI' ? 'block' : 'hidden'} p-2 bg-rose-50 rounded-lg border border-rose-200 w-full">
-                  <label class="block text-[10px] font-bold text-rose-900 uppercase mb-1">Argumento para Opinión</label>
-                  <textarea id="op-text-input-${preguntaId}" rows="2" placeholder="Escribe el argumento para la opinión..." class="w-full p-2 border border-rose-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-rose-500 bg-white leading-tight whitespace-pre-wrap break-words">${valOpinionText}</textarea>
-                </div>
-
-                <div id="panel-todo-fields-${preguntaId}" class="${esTodo === 'SI' ? 'block' : 'hidden'} p-2.5 bg-slate-100 rounded-lg border border-slate-300 space-y-2 w-full">
-                  <div>
-                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Detalle To/Do</label>
-                    <textarea id="todo-text-${preguntaId}" rows="2" placeholder="Detalle de lo que está pendiente..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white leading-tight whitespace-pre-wrap break-words">${valTodoText}</textarea>
-                  </div>
-
-                  <div class="bg-white p-2 rounded border border-slate-200">
-                    <label class="block text-[11px] font-bold text-indigo-700 mb-1">A Realizar To/Do</label>
-                    <div class="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-700">
-                      <label class="flex items-center gap-1.5 cursor-pointer">
-                        <input type="checkbox" id="todo-visita-preliminar-${preguntaId}" ${chkPreliminar} class="rounded text-indigo-600 focus:ring-indigo-500">
-                        <span>Visita Preliminar</span>
-                      </label>
-                      <label class="flex items-center gap-1.5 cursor-pointer">
-                        <input type="checkbox" id="todo-visita-final-${preguntaId}" ${chkFinal} class="rounded text-indigo-600 focus:ring-indigo-500">
-                        <span>Visita Final</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Asignado - email</label>
-                    <input type="email" id="todo-email-${preguntaId}" value="${valTodoAsignadoEmail}" placeholder="ejemplo@correo.com" class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white">
-                  </div>
-
-                  <div>
-                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Comentario Ejecutor</label>
-                    <textarea id="todo-comentario-ejecutor-${preguntaId}" rows="2" placeholder="Comentario o avance del ejecutor..." class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-white leading-tight whitespace-pre-wrap break-words">${valTodoComentarioEjecutor}</textarea>
-                  </div>
-
-                  <div class="p-2 bg-white rounded border border-slate-200 space-y-2">
-                    <div class="flex items-center gap-2">
-                      <input type="checkbox" id="todo-revisado-${preguntaId}" ${valTodoRevisado ? 'checked' : ''} class="w-4 h-4 text-slate-700 border-slate-300 rounded focus:ring-slate-500">
-                      <label for="todo-revisado-${preguntaId}" class="text-xs font-bold text-slate-700">To/Do Revisado</label>
-                    </div>
-
-                    <div>
-                      <label class="block text-[11px] font-bold text-slate-600 mb-1">Email de quien revisó</label>
-                      <input type="email" id="todo-reviso-email-${preguntaId}" value="${valTodoRevisoEmail}" placeholder="revisor@correo.com" class="w-full p-2 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-slate-500 bg-slate-50">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1.5 w-full">
-                  <label class="block text-[10px] font-bold text-slate-600 uppercase">Decisión Final (Socio)</label>
-                  <select id="socio-sel-${preguntaId}" class="w-full p-1.5 bg-white border border-slate-300 font-semibold text-xs rounded-md outline-none focus:ring-1 focus:ring-indigo-500">
-                    <option value="PENDIENTE" ${decisionSocioVal === 'PENDIENTE' ? 'selected' : ''}>Pendiente de Revisión</option>
-                    <option value="VA_OPINION" ${decisionSocioVal === 'VA_OPINION' ? 'selected' : ''}>SI VA a la Opinión Final</option>
-                    <option value="NO_VA" ${decisionSocioVal === 'NO_VA' ? 'selected' : ''}>NO VA (Desestimado / Corregido)</option>
-                  </select>
-                  <textarea id="socio-comment-${preguntaId}" rows="1" placeholder="Comentario sobre decisión final..." class="w-full p-1.5 border border-slate-300 rounded-md text-xs outline-none focus:ring-1 focus:ring-indigo-500 bg-white leading-tight whitespace-pre-wrap break-words">${comentarioDecisionVal}</textarea>
-                </div>
-
+              <!-- CONTENEDORES OCULTOS PARA GUARDADO COMPATIBLE -->
+              <div class="hidden">
+                <textarea id="ql-obs-text-${preguntaId}">${valObservacionQL}</textarea>
+                <textarea id="op-text-input-${preguntaId}">${valOpinionText}</textarea>
+                <textarea id="todo-text-${preguntaId}">${valTodoText}</textarea>
+                <input type="checkbox" id="todo-visita-preliminar-${preguntaId}" ${chkPreliminar ? 'checked' : ''}>
+                <input type="checkbox" id="todo-visita-final-${preguntaId}" ${chkFinal ? 'checked' : ''}>
+                <input type="email" id="todo-email-${preguntaId}" value="${valTodoAsignadoEmail}">
+                <textarea id="todo-comentario-ejecutor-${preguntaId}">${valTodoComentarioEjecutor}</textarea>
+                <input type="checkbox" id="todo-revisado-${preguntaId}" ${valTodoRevisado ? 'checked' : ''}>
+                <input type="email" id="todo-reviso-email-${preguntaId}" value="${valTodoRevisoEmail}">
+                <select id="socio-sel-${preguntaId}"><option value="${decisionSocioVal}" selected></option></select>
+                <textarea id="socio-comment-${preguntaId}">${comentarioDecisionVal}</textarea>
               </div>
-            </div>
+            </td>
 
-            <div class="mt-3 pt-2 border-t border-slate-100">
-              <button onclick="guardarPreguntaCompleta('${preguntaId}', ${tieneOpciones})" class="w-full py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition shadow">
-                Guardar Evaluación ${anioVal}
-              </button>
-            </div>
-
-          </div>
+            <!-- 3. Campo Escribible de Respuesta -->
+            <td class="p-2 align-top bg-white">
+              ${htmlSeleccion}
+              <div>
+                <label class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Respuesta Detallada (${anioVal})</label>
+                <textarea id="resp-${preguntaId}" rows="4" placeholder="Escribe la respuesta detallada..." class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500 bg-slate-50 focus:bg-white leading-relaxed whitespace-pre-wrap break-words">${valRespuestaText}</textarea>
+              </div>
+            </td>
+          </tr>
         `;
       });
     }
@@ -1094,6 +1264,27 @@
       }
     }
 
+    // FUNCIONALIDAD DE VISIBILIDAD DE COLUMNAS EN EL HISTÓRICO
+    function toggleColumnaAnio(anio) {
+      visibilidadAnios[anio] = !visibilidadAnios[anio];
+      
+      const btn = document.getElementById(`btn-col-${anio}`);
+      if (visibilidadAnios[anio]) {
+        btn.classList.remove('opacity-40', 'line-through');
+      } else {
+        btn.classList.add('opacity-40', 'line-through');
+      }
+
+      // Conmutar encabezados y celdas
+      const th = document.getElementById(`th-col-${anio}`);
+      if (th) th.style.display = visibilidadAnios[anio] ? '' : 'none';
+
+      const celdas = document.querySelectorAll(`.col-anio-${anio}`);
+      celdas.forEach(td => {
+        td.style.display = visibilidadAnios[anio] ? '' : 'none';
+      });
+    }
+
     async function cargarHistoricoComparativo() {
       const clienteIdVal = document.getElementById('select-cliente').value;
       const aspectoIdVal = document.getElementById('select-aspecto').value;
@@ -1135,99 +1326,29 @@
 
         let celdasAnios = '';
 
-        anios.forEach(a => {
+        anios.forEach((a) => {
           const resp = todasLasRespuestas 
             ? todasLasRespuestas.find(r => String(r.pregunta_id) === String(preguntaId) && Number(r.anio) === a)
             : null;
 
-          if (!resp) {
-            celdasAnios += `
-              <td class="p-3 border-r border-slate-200 align-top text-center text-slate-300 italic text-[11px]">
-                Sin datos
-              </td>
-            `;
-          } else {
-            let badgeOpciones = '';
-            let badgeTodo = '';
-            let badgeQuickLett = '';
-            let badgeOpinion = '';
+          const respTexto = resp ? (resp.respuesta || resp.observaciones || '') : '';
+          const hiddenStyle = visibilidadAnios[a] ? '' : 'style="display:none;"';
 
-            if (resp.resultado) {
-              const resArr = resp.resultado.split(',').map(s => s.trim());
-              const filtrados = resArr.filter(rItem => rItem && rItem !== 'QUICK_LETTER' && rItem !== 'REDACCION');
-              if (filtrados.length > 0) {
-                badgeOpciones = filtrados.map(item => `<span class="inline-block bg-indigo-100 text-indigo-800 font-bold border border-indigo-200 px-1.5 py-0.5 rounded text-[10px]">${item}</span>`).join(' ');
-              }
-            }
-            
-            if (resp.es_todo) {
-              const statusTodo = resp.todo_revisado ? 'To/Do Revisado' : 'To/Do Pendiente';
-              badgeTodo = `<span class="inline-block bg-slate-200 text-slate-800 font-bold border border-slate-300 px-1.5 py-0.5 rounded text-[10px]">${statusTodo}</span>`;
-            }
-
-            if (resp.resultado && resp.resultado.includes('QUICK_LETTER')) {
-              badgeQuickLett = `<span class="inline-block bg-orange-100 text-orange-800 font-bold border border-orange-300 px-1.5 py-0.5 rounded text-[10px]">Quick Lett</span>`;
-            }
-
-            if (resp.es_opinion) {
-              badgeOpinion = `<span class="inline-block bg-rose-100 text-rose-800 font-bold border border-rose-300 px-1.5 py-0.5 rounded text-[10px]">Opinión</span>`;
-            }
-
-            const badgesHTML = [badgeOpciones, badgeTodo, badgeQuickLett, badgeOpinion].filter(b => b !== '').join(' ');
-
-            let badgeSocio = '';
-            const comentarioSocio = resp.comentario_decision ? `<div class="italic text-[10px] mt-0.5 text-slate-600">${resp.comentario_decision}</div>` : '';
-
-            if (resp.decision_socio === 'VA_OPINION') {
-              badgeSocio = `<div class="mt-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 p-1 rounded border border-emerald-200">Decisión: SI VA a Opinión ${comentarioSocio}</div>`;
-            } else if (resp.decision_socio === 'NO_VA') {
-              badgeSocio = `<div class="mt-1 text-[10px] font-bold text-slate-500 bg-slate-100 p-1 rounded border border-slate-300">Decisión: NO VA ${comentarioSocio}</div>`;
-            } else {
-              badgeSocio = `<div class="mt-1 text-[10px] font-semibold text-amber-700 bg-amber-50/60 p-1 rounded border border-amber-200">Decisión: Pendiente ${comentarioSocio}</div>`;
-            }
-
-            const respTexto = resp.respuesta || resp.observaciones || '';
-            
-            let todoTexto = '';
-            if (resp.es_todo) {
-              todoTexto = `
-                <div class="text-[10px] text-slate-700 bg-slate-100 p-1.5 rounded border border-slate-200 mt-1 space-y-0.5">
-                  <div><strong>To/Do:</strong> ${resp.detalle_todo || 'Sin detalle'}</div>
-                  ${resp.todo_visita ? `<div class="text-indigo-800 font-semibold"><strong>En:</strong> ${resp.todo_visita}</div>` : ''}
-                  ${resp.todo_asignado_email ? `<div><strong>Asignado:</strong> ${resp.todo_asignado_email}</div>` : ''}
-                  ${resp.todo_comentario_ejecutor ? `<div><strong>Ejecutor:</strong> ${resp.todo_comentario_ejecutor}</div>` : ''}
-                  ${resp.todo_revisado ? `<div class="text-emerald-700 font-bold">✓ Revisado por: ${resp.todo_reviso_email || 'N/A'}</div>` : ''}
-                </div>
-              `;
-            }
-
-            const obsQLTexto = (resp.resultado && resp.resultado.includes('QUICK_LETTER')) 
-              ? `<div class="text-[10px] text-orange-800 bg-orange-50 p-1 rounded border border-orange-200 mt-1"><strong>Quick Lett:</strong> ${resp.observaciones_ql || 'Sin detalle'}</div>` 
-              : '';
-
-            let opinionTexto = '';
-            if (resp.es_opinion) {
-              opinionTexto = `<div class="text-[10px] text-rose-800 bg-rose-50 p-1 rounded border border-rose-200 mt-1"><strong>Opinión:</strong> ${resp.detalle_opinion || 'Sin detalle'}</div>`;
-            }
-
-            celdasAnios += `
-              <td class="p-3 border-r border-slate-200 align-top text-left text-xs space-y-1">
-                <div class="flex flex-wrap gap-1 mb-1">${badgesHTML}</div>
-                <div class="text-slate-800 leading-snug whitespace-pre-wrap break-words">${respTexto}</div>
-                ${todoTexto}
-                ${obsQLTexto}
-                ${opinionTexto}
-                ${badgeSocio}
-              </td>
-            `;
-          }
+          celdasAnios += `
+            <td ${hiddenStyle} class="col-anio-${a} p-2 border-r border-slate-200 align-top text-left text-xs bg-slate-50/50">
+              <div>
+                <label class="block text-[9px] font-bold text-slate-500 uppercase mb-0.5">Respuesta ${a}</label>
+                <textarea readonly rows="4" class="w-full p-1.5 border border-slate-200 rounded text-xs bg-slate-100 text-slate-700 outline-none resize-none">${respTexto}</textarea>
+              </div>
+            </td>
+          `;
         });
 
         tbody.innerHTML += `
           <tr class="hover:bg-slate-50/80 transition">
-            <td class="p-3 border-r border-slate-200 align-top">
+            <td class="p-3 border-r border-slate-200 align-top bg-white">
               <span class="text-[10px] font-bold bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded mr-1">#${idx + 1}</span>
-              <span class="font-semibold text-slate-800">${textoPregunta}</span>
+              <span class="font-semibold text-slate-800 leading-snug">${textoPregunta}</span>
             </td>
             ${celdasAnios}
           </tr>
