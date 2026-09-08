@@ -1253,6 +1253,12 @@
         comentario_decision: comSocioVal
       };
 
+      // CONDICIÓN REQUERIDA DE VALIDACIÓN
+      if (payload.es_opinion && payload.decision_socio === "VA_OPINION" && (!payload.comentario_decision || payload.comentario_decision.trim() === "")) {
+        alert("Atención: Debe ingresar una observación si el estado es 'SI VA a la Opinión Final'.");
+        return;
+      }
+
       const { data, error } = await supabaseClient
         .from('respuestas_auditoria')
         .upsert(payload, { onConflict: 'cliente_id, pregunta_id, anio' });
