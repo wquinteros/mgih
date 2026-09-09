@@ -231,7 +231,7 @@
 
             <div id="box-select-anio">
               <label class="block text-xs font-semibold text-slate-600 mb-1">Año a Evaluar</label>
-              <select id="select-anio" onchange="cargarPreguntas()" class="w-full p-2 bg-slate-900 font-bold text-white rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-slate-700 outline-none shadow-sm transition">
+              <select id="select-anio" onchange="ejecutarConsultaSegunVista()" class="w-full p-2 bg-slate-900 font-bold text-white rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-slate-700 outline-none shadow-sm transition">
                 <option value="2027">Año 2027</option>
                 <option value="2026" selected>Año 2026</option>
                 <option value="2025">Año 2025</option>
@@ -462,8 +462,10 @@
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-slate-600 mb-1">Asignado - email</label>
-          <input type="email" id="modal-todo-email" placeholder="ejemplo@correo.com" class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-500 bg-white">
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Asignado a Auditor / Correo</label>
+          <select id="modal-todo-email" class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-500 bg-white select-auditores-dyn">
+            <option value="">-- Seleccionar Auditor / Usuario --</option>
+          </select>
         </div>
 
         <div>
@@ -478,8 +480,10 @@
           </div>
 
           <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Email de quien revisó</label>
-            <input type="email" id="modal-todo-reviso-email" placeholder="revisor@correo.com" class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-500 bg-white">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Email de quien revisó (Usuario en sesión)</label>
+            <select id="modal-todo-reviso-email" class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-500 bg-white select-auditores-dyn">
+              <option value="">-- Seleccionar Revisor --</option>
+            </select>
           </div>
         </div>
       </div>
@@ -506,8 +510,28 @@
 
       <div class="space-y-3">
         <div>
+          <label class="block text-[11px] font-bold text-orange-900 uppercase mb-1">Elaborado Por:</label>
+          <select id="modal-ql-elaborado" class="w-full p-2 bg-white border border-orange-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-orange-500 select-auditores-dyn">
+            <option value="">-- Seleccionar Auditor --</option>
+          </select>
+        </div>
+
+        <div>
           <label class="block text-[11px] font-bold text-orange-900 uppercase mb-1">Detalle del Hallazgo (Quick Lett)</label>
           <textarea id="modal-ql-text" rows="4" placeholder="Escribe el detalle del hallazgo para Quick Lett..." class="w-full p-2.5 border border-orange-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-orange-500 bg-white leading-relaxed"></textarea>
+        </div>
+
+        <div class="bg-orange-50/50 p-3 rounded-lg border border-orange-200 space-y-2">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="modal-ql-revisado" class="w-4 h-4 text-orange-600 border-orange-300 rounded focus:ring-orange-500">
+            <label for="modal-ql-revisado" class="text-xs font-bold text-orange-900">Marcar como Revisado</label>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-orange-800 uppercase mb-1">Revisado Por:</label>
+            <select id="modal-ql-revisado-por" class="w-full p-2 bg-white border border-orange-300 text-xs rounded-lg outline-none focus:ring-2 focus:ring-orange-500 select-auditores-dyn">
+              <option value="">-- Seleccionar Auditor --</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -533,6 +557,13 @@
 
       <div class="space-y-3">
         <div>
+          <label class="block text-[11px] font-bold text-rose-900 uppercase mb-1">Elaborado Por:</label>
+          <select id="modal-op-elaborado" class="w-full p-2 bg-white border border-rose-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-rose-500 select-auditores-dyn">
+            <option value="">-- Seleccionar Auditor --</option>
+          </select>
+        </div>
+
+        <div>
           <label class="block text-[11px] font-bold text-rose-900 uppercase mb-1">Argumento para Opinión</label>
           <textarea id="modal-op-text" rows="3" placeholder="Escribe el argumento para la opinión..." class="w-full p-2.5 border border-rose-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-rose-500 bg-white leading-relaxed"></textarea>
         </div>
@@ -544,6 +575,12 @@
             <option value="VA_OPINION">SI VA a la Opinión Final</option>
             <option value="NO_VA">NO VA (Desestimado / Corregido)</option>
           </select>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Revisado Por (Socio/Revisor):</label>
+            <select id="modal-op-revisado-por" class="w-full p-2 bg-white border border-slate-300 text-xs rounded-lg outline-none focus:ring-2 focus:ring-rose-500 select-auditores-dyn">
+              <option value="">-- Seleccionar Auditor/Socio --</option>
+            </select>
+          </div>
           <textarea id="modal-socio-comment" rows="2" placeholder="Comentario sobre decisión final..." class="w-full p-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-rose-500 bg-white leading-relaxed"></textarea>
         </div>
       </div>
@@ -563,6 +600,8 @@
 
     let pestanaActual = 'captura';
     let listaClientesCache = [];
+    let listaUsuariosCache = [];
+    let usuarioSesionEmail = '';
     
     // Estado de visibilidad de las columnas por año en el histórico
     const visibilidadAnios = {
@@ -578,10 +617,22 @@
     });
 
     async function iniciar() {
+      await obtenerUsuarioSesion();
       await cargarClientes();
       await cargarAspectos();
       await cargarUsuariosTabla();
       await cargarSelectsAuxiliares();
+    }
+
+    async function obtenerUsuarioSesion() {
+      try {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (user && user.email) {
+          usuarioSesionEmail = user.email;
+        }
+      } catch (e) {
+        console.warn("No se pudo obtener usuario Auth activo", e);
+      }
     }
 
     // NAVEGACIÓN MENÚ LATERAL
@@ -749,6 +800,12 @@
         return;
       }
 
+      listaUsuariosCache = usuarios || [];
+      if (!usuarioSesionEmail && listaUsuariosCache.length > 0) {
+        usuarioSesionEmail = listaUsuariosCache[0].email || '';
+      }
+      poblarSelectsAuditores();
+
       tbody.innerHTML = '';
       if (selectVis) selectVis.innerHTML = '<option value="">-- Selecciona Auditor --</option>';
 
@@ -774,6 +831,22 @@
       } else {
         tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">No hay usuarios registrados.</td></tr>';
       }
+    }
+
+    function poblarSelectsAuditores() {
+      const selects = document.querySelectorAll('.select-auditores-dyn');
+      selects.forEach(sel => {
+        const valPrevio = sel.value;
+        sel.innerHTML = '<option value="">-- Seleccionar Auditor / Usuario --</option>';
+        if (listaUsuariosCache && listaUsuariosCache.length > 0) {
+          listaUsuariosCache.forEach(u => {
+            const nom = u.nombre || u.nombre_completo || u.email || 'Auditor';
+            const email = u.email || nom;
+            sel.innerHTML += `<option value="${email}">${nom} (${email})</option>`;
+          });
+        }
+        if (valPrevio) sel.value = valPrevio;
+      });
     }
 
     async function guardarNuevoUsuario(e) {
@@ -852,17 +925,17 @@
       } else if (modo === 'todo') {
         btnTodo.className = activeClass;
         vistaTodo.classList.remove('hidden');
-        boxAnio.classList.add('hidden');
+        boxAnio.classList.remove('hidden');
         boxAspecto.classList.add('hidden');
       } else if (modo === 'quicklett') {
         btnQuickLett.className = activeClass;
         vistaQuickLett.classList.remove('hidden');
-        boxAnio.classList.add('hidden');
+        boxAnio.classList.remove('hidden');
         boxAspecto.classList.add('hidden');
       } else if (modo === 'opinion') {
         btnOpinion.className = activeClass;
         vistaOpinion.classList.remove('hidden');
-        boxAnio.classList.add('hidden');
+        boxAnio.classList.remove('hidden');
         boxAspecto.classList.add('hidden');
       }
 
@@ -915,15 +988,30 @@
     }
 
     function abrirModalTodo(preguntaId) {
+      poblarSelectsAuditores();
+      
       document.getElementById('modal-todo-pregunta-id').value = preguntaId;
       document.getElementById('modal-todo-text').value = document.getElementById(`todo-text-${preguntaId}`).value;
       document.getElementById('modal-todo-visita-preliminar').checked = document.getElementById(`todo-visita-preliminar-${preguntaId}`).checked;
       document.getElementById('modal-todo-visita-final').checked = document.getElementById(`todo-visita-final-${preguntaId}`).checked;
-      document.getElementById('modal-todo-email').value = document.getElementById(`todo-email-${preguntaId}`).value;
+      
+      // Asignado email / auditor
+      const valEmailAsignado = document.getElementById(`todo-email-${preguntaId}`).value;
+      if (valEmailAsignado) {
+        document.getElementById('modal-todo-email').value = valEmailAsignado;
+      }
+
       document.getElementById('modal-todo-comentario-ejecutor').value = document.getElementById(`todo-comentario-ejecutor-${preguntaId}`).value;
       document.getElementById('modal-todo-revisado').checked = document.getElementById(`todo-revisado-${preguntaId}`).checked;
-      document.getElementById('modal-todo-reviso-email').value = document.getElementById(`todo-reviso-email-${preguntaId}`).value;
       
+      // Email Revisor (Por defecto usuario en sesión actual)
+      const valRevisoEmail = document.getElementById(`todo-reviso-email-${preguntaId}`).value;
+      if (valRevisoEmail) {
+        document.getElementById('modal-todo-reviso-email').value = valRevisoEmail;
+      } else if (usuarioSesionEmail) {
+        document.getElementById('modal-todo-reviso-email').value = usuarioSesionEmail;
+      }
+
       abrirModal('modal-todo');
     }
 
@@ -946,14 +1034,22 @@
     }
 
     function abrirModalQL(preguntaId) {
+      poblarSelectsAuditores();
       document.getElementById('modal-ql-pregunta-id').value = preguntaId;
       document.getElementById('modal-ql-text').value = document.getElementById(`ql-obs-text-${preguntaId}`).value;
+      document.getElementById('modal-ql-elaborado').value = document.getElementById(`ql-elaborado-${preguntaId}`).value;
+      document.getElementById('modal-ql-revisado').checked = document.getElementById(`ql-revisado-chk-${preguntaId}`).value === 'SI';
+      document.getElementById('modal-ql-revisado-por').value = document.getElementById(`ql-revisado-por-${preguntaId}`).value;
+      
       abrirModal('modal-quicklett');
     }
 
     function guardarModalQL() {
       const pId = document.getElementById('modal-ql-pregunta-id').value;
       document.getElementById(`ql-obs-text-${pId}`).value = document.getElementById('modal-ql-text').value;
+      document.getElementById(`ql-elaborado-${pId}`).value = document.getElementById('modal-ql-elaborado').value;
+      document.getElementById(`ql-revisado-chk-${pId}`).value = document.getElementById('modal-ql-revisado').checked ? 'SI' : 'NO';
+      document.getElementById(`ql-revisado-por-${pId}`).value = document.getElementById('modal-ql-revisado-por').value;
 
       document.getElementById(`ql-val-${pId}`).value = 'SI';
       const btn = document.getElementById(`btn-ql-${pId}`);
@@ -964,17 +1060,26 @@
     }
 
     function abrirModalOpinion(preguntaId) {
+      poblarSelectsAuditores();
       document.getElementById('modal-op-pregunta-id').value = preguntaId;
+      document.getElementById('modal-op-elaborado').value = document.getElementById(`op-elaborado-${preguntaId}`).value;
       document.getElementById('modal-op-text').value = document.getElementById(`op-text-input-${preguntaId}`).value;
-      document.getElementById('modal-socio-sel').value = document.getElementById(`socio-sel-${preguntaId}`).value;
+      
+      const valSocio = document.getElementById(`socio-sel-${preguntaId}`).value;
+      document.getElementById('modal-socio-sel').value = valSocio && valSocio !== "" ? valSocio : "PENDIENTE";
+      
+      document.getElementById('modal-op-revisado-por').value = document.getElementById(`op-revisado-por-${preguntaId}`).value;
       document.getElementById('modal-socio-comment').value = document.getElementById(`socio-comment-${preguntaId}`).value;
+      
       abrirModal('modal-opinion');
     }
 
     function guardarModalOpinion() {
       const pId = document.getElementById('modal-op-pregunta-id').value;
+      document.getElementById(`op-elaborado-${pId}`).value = document.getElementById('modal-op-elaborado').value;
       document.getElementById(`op-text-input-${pId}`).value = document.getElementById('modal-op-text').value;
       document.getElementById(`socio-sel-${pId}`).value = document.getElementById('modal-socio-sel').value;
+      document.getElementById(`op-revisado-por-${pId}`).value = document.getElementById('modal-op-revisado-por').value;
       document.getElementById(`socio-comment-${pId}`).value = document.getElementById('modal-socio-comment').value;
 
       document.getElementById(`op-val-${pId}`).value = 'SI';
@@ -1060,12 +1165,15 @@
         const valResultado = respExistente ? (respExistente.resultado || '') : '';
         const resultadosSeleccionados = valResultado ? valResultado.split(',').map(s => s.trim()) : [];
 
-        // MODIFICACIÓN: Se obtiene 'respuesta' como texto libre y 'resultado' para las selecciones
         const valRespuestaText = respExistente ? (respExistente.respuesta || '') : '';
         const valObservacionQL = respExistente ? (respExistente.observaciones_ql || '') : '';
-        const esQL = valResultado.includes('QUICK_LETTER') ? 'SI' : 'NO';
+        const esQL = (valResultado.includes('QUICK_LETTER') || (respExistente && respExistente.observaciones_ql && respExistente.observaciones_ql.trim() !== '')) ? 'SI' : 'NO';
         
-        const esTodo = respExistente ? (respExistente.es_todo ? 'SI' : 'NO') : 'NO';
+        const valQLElaborado = respExistente ? (respExistente.ql_elaborado_por || '') : '';
+        const valQLRevisadoChk = respExistente ? (respExistente.ql_revisado ? 'SI' : 'NO') : 'NO';
+        const valQLRevisadoPor = respExistente ? (respExistente.ql_revisado_por || '') : '';
+
+        const esTodo = (respExistente && (respExistente.es_todo === true || respExistente.es_todo === 'true')) ? 'SI' : 'NO';
         const valTodoText = respExistente ? (respExistente.detalle_todo || '') : '';
         
         const valTodoVisita = respExistente ? (respExistente.todo_visita || '') : '';
@@ -1075,12 +1183,14 @@
         const valTodoAsignadoEmail = respExistente ? (respExistente.todo_asignado_email || '') : '';
         const valTodoComentarioEjecutor = respExistente ? (respExistente.todo_comentario_ejecutor || '') : '';
         const valTodoRevisado = respExistente ? (respExistente.todo_revisado ? true : false) : false;
-        const valTodoRevisoEmail = respExistente ? (respExistente.todo_reviso_email || '') : '';
+        const valTodoRevisoEmail = respExistente ? (respExistente.todo_reviso_email || usuarioSesionEmail || '') : (usuarioSesionEmail || '');
 
-        const esOpinion = respExistente ? (respExistente.es_opinion ? 'SI' : 'NO') : 'NO';
+        const esOpinion = (respExistente && (respExistente.es_opinion === true || respExistente.es_opinion === 'true')) ? 'SI' : 'NO';
+        const valOpElaborado = respExistente ? (respExistente.op_elaborado_por || '') : '';
         const valOpinionText = respExistente ? (respExistente.detalle_opinion || '') : '';
         
         const decisionSocioVal = respExistente ? (respExistente.decision_socio || 'PENDIENTE') : 'PENDIENTE';
+        const valOpRevisadoPor = respExistente ? (respExistente.op_revisado_por || '') : '';
         const comentarioDecisionVal = respExistente ? (respExistente.comentario_decision || '') : '';
 
         let htmlSeleccion = '';
@@ -1160,15 +1270,22 @@
               <!-- CONTENEDORES OCULTOS PARA GUARDADO COMPATIBLE -->
               <div class="hidden">
                 <textarea id="ql-obs-text-${preguntaId}">${valObservacionQL}</textarea>
+                <input type="text" id="ql-elaborado-${preguntaId}" value="${valQLElaborado}">
+                <input type="text" id="ql-revisado-chk-${preguntaId}" value="${valQLRevisadoChk}">
+                <input type="text" id="ql-revisado-por-${preguntaId}" value="${valQLRevisadoPor}">
+
+                <input type="text" id="op-elaborado-${preguntaId}" value="${valOpElaborado}">
                 <textarea id="op-text-input-${preguntaId}">${valOpinionText}</textarea>
+                <input type="text" id="op-revisado-por-${preguntaId}" value="${valOpRevisadoPor}">
+
                 <textarea id="todo-text-${preguntaId}">${valTodoText}</textarea>
                 <input type="checkbox" id="todo-visita-preliminar-${preguntaId}" ${chkPreliminar ? 'checked' : ''}>
                 <input type="checkbox" id="todo-visita-final-${preguntaId}" ${chkFinal ? 'checked' : ''}>
-                <input type="email" id="todo-email-${preguntaId}" value="${valTodoAsignadoEmail}">
+                <input type="text" id="todo-email-${preguntaId}" value="${valTodoAsignadoEmail}">
                 <textarea id="todo-comentario-ejecutor-${preguntaId}">${valTodoComentarioEjecutor}</textarea>
                 <input type="checkbox" id="todo-revisado-${preguntaId}" ${valTodoRevisado ? 'checked' : ''}>
-                <input type="email" id="todo-reviso-email-${preguntaId}" value="${valTodoRevisoEmail}">
-                <select id="socio-sel-${preguntaId}"><option value="${decisionSocioVal}" selected></option></select>
+                <input type="text" id="todo-reviso-email-${preguntaId}" value="${valTodoRevisoEmail}">
+                <input type="text" id="socio-sel-${preguntaId}" value="${decisionSocioVal}">
                 <textarea id="socio-comment-${preguntaId}">${comentarioDecisionVal}</textarea>
               </div>
             </td>
@@ -1184,6 +1301,8 @@
           </tr>
         `;
       });
+      
+      poblarSelectsAuditores();
     }
 
     async function guardarPreguntaCompleta(preguntaId, tieneOpciones) {
@@ -1208,14 +1327,15 @@
         resultadoVal = resultadoVal ? `${resultadoVal}, QUICK_LETTER` : 'QUICK_LETTER';
       }
 
-      // Si la pregunta tiene opciones, guardamos también las selecciones en "respuesta"
-      // para que aparezcan en el Histórico de Pregunta por Año.
-      // En "resultado" se conserva además QUICK_LETTER cuando corresponda.
       const respVal = tieneOpciones
         ? opcionesSeleccionadas.join(', ')
         : document.getElementById(`resp-${preguntaId}`).value;
       const obsQLElem = document.getElementById(`ql-obs-text-${preguntaId}`);
       const obsQL = obsQLElem ? obsQLElem.value : '';
+
+      const qlElaborado = document.getElementById(`ql-elaborado-${preguntaId}`).value;
+      const qlRevisadoChk = document.getElementById(`ql-revisado-chk-${preguntaId}`).value === 'SI';
+      const qlRevisadoPor = document.getElementById(`ql-revisado-por-${preguntaId}`).value;
 
       const esTodoVal = document.getElementById(`todo-val-${preguntaId}`).value === 'SI';
       const detailTodoVal = document.getElementById(`todo-text-${preguntaId}`).value;
@@ -1233,10 +1353,12 @@
       const revEmailVal = document.getElementById(`todo-reviso-email-${preguntaId}`).value;
 
       const esOpinionVal = document.getElementById(`op-val-${preguntaId}`).value === 'SI';
+      const opElaborado = document.getElementById(`op-elaborado-${preguntaId}`).value;
       const detailOpinionElem = document.getElementById(`op-text-input-${preguntaId}`);
       const detailOpinionVal = detailOpinionElem ? detailOpinionElem.value : '';
 
       const decSocioVal = document.getElementById(`socio-sel-${preguntaId}`).value;
+      const opRevisadoPor = document.getElementById(`op-revisado-por-${preguntaId}`).value;
       const comSocioVal = document.getElementById(`socio-comment-${preguntaId}`).value;
 
       const payload = {
@@ -1246,6 +1368,9 @@
         resultado: resultadoVal,
         respuesta: respVal,
         observaciones_ql: obsQL,
+        ql_elaborado_por: qlElaborado,
+        ql_revisado: qlRevisadoChk,
+        ql_revisado_por: qlRevisadoPor,
         es_todo: esTodoVal,
         detalle_todo: detailTodoVal,
         todo_visita: todoVisitaVal,
@@ -1254,12 +1379,13 @@
         todo_revisado: revTodoVal,
         todo_reviso_email: revEmailVal,
         es_opinion: esOpinionVal,
+        op_elaborado_por: opElaborado,
         detalle_opinion: detailOpinionVal,
         decision_socio: decSocioVal,
+        op_revisado_por: opRevisadoPor,
         comentario_decision: comSocioVal
       };
 
-      // CONDICIÓN REQUERIDA DE VALIDACIÓN
       if (payload.es_opinion && payload.decision_socio === "VA_OPINION" && (!payload.comentario_decision || payload.comentario_decision.trim() === "")) {
         alert("Atención: Debe ingresar una observación si el estado es 'SI VA a la Opinión Final'.");
         return;
@@ -1287,7 +1413,6 @@
         btn.classList.add('opacity-40', 'line-through');
       }
 
-      // Conmutar encabezados y celdas
       const th = document.getElementById(`th-col-${anio}`);
       if (th) th.style.display = visibilidadAnios[anio] ? '' : 'none';
 
@@ -1343,9 +1468,6 @@
             ? todasLasRespuestas.find(r => String(r.pregunta_id) === String(preguntaId) && Number(r.anio) === a)
             : null;
 
-          // El Histórico muestra primero 'respuesta'.
-          // Para registros antiguos, donde las selecciones solo quedaron en 'resultado',
-          // usamos 'resultado' como respaldo y excluimos marcas internas como QUICK_LETTER.
           let respTexto = resp ? (resp.respuesta || '').trim() : '';
 
           if (!respTexto && resp && resp.resultado) {
@@ -1381,6 +1503,7 @@
 
     async function cargarResumenTodo() {
       const clienteIdVal = document.getElementById('select-cliente').value;
+      const anioVal = document.getElementById('select-anio').value;
       const contenedor = document.getElementById('contenedor-resumen-todo');
       const contador = document.getElementById('contador-todo');
 
@@ -1392,14 +1515,20 @@
 
       contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-6">Cargando acumulado de pendientes To/Do...</p>';
 
-      const { data: respuestas, error } = await supabaseClient
+      let query = supabaseClient
         .from('respuestas_auditoria')
         .select('*')
         .eq('cliente_id', clienteIdVal)
         .eq('es_todo', true);
 
+      if (anioVal) {
+        query = query.eq('anio', Number(anioVal));
+      }
+
+      const { data: respuestas, error } = await query;
+
       if (error || !respuestas || respuestas.length === 0) {
-        contenedor.innerHTML = '<div class="col-span-full p-4 bg-slate-50 text-slate-700 text-xs rounded-xl border border-slate-200 text-center font-medium">No existen tareas o pendientes To/Do registrados para este cliente.</div>';
+        contenedor.innerHTML = '<div class="col-span-full p-4 bg-slate-50 text-slate-700 text-xs rounded-xl border border-slate-200 text-center font-medium">No existen tareas o pendientes To/Do registrados para este cliente en el año seleccionado.</div>';
         contador.textContent = '0 Pendientes';
         return;
       }
@@ -1441,6 +1570,7 @@
 
     async function cargarResumenQuickLett() {
       const clienteIdVal = document.getElementById('select-cliente').value;
+      const anioVal = document.getElementById('select-anio').value;
       const contenedor = document.getElementById('contenedor-resumen-ql');
       const contador = document.getElementById('contador-ql');
 
@@ -1452,26 +1582,41 @@
 
       contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-6">Cargando hallazgos Quick Lett...</p>';
 
-      const { data: respuestas, error } = await supabaseClient
+      let query = supabaseClient
         .from('respuestas_auditoria')
         .select('*')
-        .eq('cliente_id', clienteIdVal)
-        .ilike('resultado', '%QUICK_LETTER%');
+        .eq('cliente_id', clienteIdVal);
 
-      if (error || !respuestas || respuestas.length === 0) {
-        contenedor.innerHTML = '<div class="col-span-full p-4 bg-orange-50 text-orange-800 text-xs rounded-xl border border-orange-200 text-center font-medium">No existen hallazgos de Quick Lett registrados para este cliente.</div>';
+      if (anioVal) {
+        query = query.eq('anio', Number(anioVal));
+      }
+
+      const { data: respuestas, error } = await query;
+
+      const respuestasQL = respuestas ? respuestas.filter(r => {
+        const tieneQLInResultado = r.resultado && String(r.resultado).includes('QUICK_LETTER');
+        const tieneObsQL = r.observaciones_ql && String(r.observaciones_ql).trim() !== '';
+        return tieneQLInResultado || tieneObsQL;
+      }) : [];
+
+      if (error || respuestasQL.length === 0) {
+        contenedor.innerHTML = '<div class="col-span-full p-4 bg-orange-50 text-orange-800 text-xs rounded-xl border border-orange-200 text-center font-medium">No existen hallazgos de Quick Lett registrados para este cliente en el año seleccionado.</div>';
         contador.textContent = '0 Hallazgos';
         return;
       }
 
-      contador.textContent = `${respuestas.length} Hallazgos`;
+      contador.textContent = `${respuestasQL.length} Hallazgos`;
       contenedor.innerHTML = '';
 
       const { data: preguntas } = await supabaseClient.from('preguntas_banco').select('*');
 
-      respuestas.forEach((r, idx) => {
+      respuestasQL.forEach((r, idx) => {
         const pregObj = preguntas ? preguntas.find(p => String(p.pregunta_id || p.id || p.id_pregunta) === String(r.pregunta_id)) : null;
         const textoPreg = pregObj ? (pregObj.texto_pregunta || pregObj.pregunta || `Pregunta #${r.pregunta_id}`) : `Pregunta #${r.pregunta_id}`;
+
+        const revBadge = r.ql_revisado 
+          ? `<span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-300">✓ REVISADO por ${r.ql_revisado_por || 'N/A'}</span>`
+          : `<span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded border border-amber-300">PENDIENTE DE REVISIÓN</span>`;
 
         contenedor.innerHTML += `
           <div class="p-4 bg-orange-50/40 border border-orange-200 rounded-xl space-y-2 shadow-xs">
@@ -1480,9 +1625,15 @@
               <span class="text-xs font-bold text-orange-800">Año ${r.anio}</span>
             </div>
             <p class="text-xs font-semibold text-slate-800">${textoPreg}</p>
-            <div class="p-2.5 bg-white rounded-lg border border-orange-200 text-xs text-slate-700">
-              <strong class="text-orange-900 block mb-1">Detalle del Hallazgo:</strong>
-              <div class="whitespace-pre-wrap break-words">${r.observaciones_ql || r.respuesta || 'Sin detalle escrito'}</div>
+            <div class="p-2.5 bg-white rounded-lg border border-orange-200 text-xs text-slate-700 space-y-2">
+              <div>
+                <strong class="text-orange-900 block mb-0.5">Detalle del Hallazgo:</strong>
+                <div class="whitespace-pre-wrap break-words">${r.observaciones_ql || r.respuesta || 'Sin detalle escrito'}</div>
+              </div>
+              <div class="pt-2 border-t border-orange-100 flex flex-wrap justify-between items-center gap-2 text-[11px]">
+                <span><strong>Elaborado por:</strong> ${r.ql_elaborado_por || 'Sin especificar'}</span>
+                ${revBadge}
+              </div>
             </div>
           </div>
         `;
@@ -1491,6 +1642,7 @@
 
     async function cargarResumenOpinion() {
       const clienteIdVal = document.getElementById('select-cliente').value;
+      const anioVal = document.getElementById('select-anio').value;
       const contenedor = document.getElementById('contenedor-resumen-opinion');
       const contador = document.getElementById('contador-opinion');
       const estadoGlobal = document.getElementById('estado-global-opinion');
@@ -1505,14 +1657,20 @@
 
       contenedor.innerHTML = '<p class="col-span-full text-xs text-slate-500 text-center py-6">Cargando puntos de opinión...</p>';
 
-      const { data: respuestas, error } = await supabaseClient
+      let query = supabaseClient
         .from('respuestas_auditoria')
         .select('*')
         .eq('cliente_id', clienteIdVal)
         .eq('es_opinion', true);
 
+      if (anioVal) {
+        query = query.eq('anio', Number(anioVal));
+      }
+
+      const { data: respuestas, error } = await query;
+
       if (error || !respuestas || respuestas.length === 0) {
-        contenedor.innerHTML = '<div class="col-span-full p-4 bg-rose-50 text-rose-800 text-xs rounded-xl border border-rose-200 text-center font-medium">No existen puntos marcados para Opinión en este cliente.</div>';
+        contenedor.innerHTML = '<div class="col-span-full p-4 bg-rose-50 text-rose-800 text-xs rounded-xl border border-rose-200 text-center font-medium">No existen puntos marcados para Opinión en este cliente en el año seleccionado.</div>';
         contador.textContent = '0 Casos';
         estadoGlobal.textContent = 'Limpio / Sin Salvedades';
         estadoGlobal.className = 'text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-md';
@@ -1562,10 +1720,20 @@
               ${estadoBadge}
             </div>
             <p class="text-xs font-semibold text-slate-800">${textoPreg}</p>
-            <div class="p-2.5 bg-white rounded-lg border border-rose-200 text-xs text-slate-700 space-y-1">
-              <strong class="text-rose-900 block">Argumento de Opinión:</strong>
-              <div class="whitespace-pre-wrap break-words">${r.detalle_opinion || r.respuesta || 'Sin argumento registrado'}</div>
-              ${r.comentario_decision ? `<div class="pt-2 mt-2 border-t border-slate-100 text-[11px] text-slate-600 italic"><strong>Comentario Socio:</strong> ${r.comentario_decision}</div>` : ''}
+            <div class="p-2.5 bg-white rounded-lg border border-rose-200 text-xs text-slate-700 space-y-2">
+              <div>
+                <strong class="text-rose-900 block">Argumento de Opinión:</strong>
+                <div class="whitespace-pre-wrap break-words">${r.detalle_opinion || r.respuesta || 'Sin argumento registrado'}</div>
+              </div>
+              <div class="text-[11px] text-slate-600">
+                <strong>Elaborado por:</strong> ${r.op_elaborado_por || 'Sin especificar'}
+              </div>
+              ${(r.op_revisado_por || r.comentario_decision) ? `
+                <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-600 space-y-1">
+                  ${r.op_revisado_por ? `<div><strong>Revisado por (Socio):</strong> ${r.op_revisado_por}</div>` : ''}
+                  ${r.comentario_decision ? `<div class="italic"><strong>Comentario Decisión:</strong> ${r.comentario_decision}</div>` : ''}
+                </div>
+              ` : ''}
             </div>
           </div>
         `;
